@@ -6,6 +6,7 @@ from .helpers import check_required_env_vars, combine_env_configs
 
 env_config: Dict[str, Any] = combine_env_configs()
 
+
 def ipqs_malicious_url(query: str, **kwargs: Dict[str, Any]) -> Response:
     """IPQualityScore's Malicious URL Scanner API scans links in real-time
         to detect suspicious URLs. Accurately identify phishing links, malware
@@ -29,7 +30,7 @@ def ipqs_malicious_url(query: str, **kwargs: Dict[str, Any]) -> Response:
     check_required_env_vars(env_config, required_vars)
 
     method: str = 'post'
-    url: str = f'https://ipqualityscore.com/api/json/url'
+    url: str = 'https://ipqualityscore.com/api/json/url'
     headers: Dict = {'accept': 'application/json'}
     encoded_query: str = quote(query)
     params: Dict = {
@@ -38,6 +39,12 @@ def ipqs_malicious_url(query: str, **kwargs: Dict[str, Any]) -> Response:
         **kwargs
     }
 
-    result: Response = make_request(method=method, url=url, headers=headers, json=params)
+    result: Response = make_request(
+        method=method,
+        url=url,
+        headers=headers,
+        json=params,
+        timeout=kwargs.get("timeout")
+    )
 
     return result

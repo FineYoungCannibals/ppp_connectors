@@ -42,7 +42,7 @@ def spycloud_sip_cookie_domains(cookie_domains: str, **kwargs: Dict[str, Any]) -
     return result
 
 
-def spycloud_ato_breach_catalog(query:str, **kwargs: Dict[str, Any]) -> Response:
+def spycloud_ato_breach_catalog(query: str, **kwargs: Dict[str, Any]) -> Response:
     """List or Query the Breach Catalog
 
     Args:
@@ -61,7 +61,7 @@ def spycloud_ato_breach_catalog(query:str, **kwargs: Dict[str, Any]) -> Response
     check_required_env_vars(env_config, required_vars)
 
     method: str = 'get'
-    url: str = f'https://api.spycloud.io/sp-v2/breach/catalog'
+    url: str = 'https://api.spycloud.io/sp-v2/breach/catalog'
     headers: Dict = {
         'accept': 'application/json',
         'x-api-key': env_config['SPYCLOUD_API_ATO_KEY']
@@ -71,12 +71,18 @@ def spycloud_ato_breach_catalog(query:str, **kwargs: Dict[str, Any]) -> Response
         **kwargs
     }
 
-    result: Response = make_request(method=method, url=url, headers=headers, params=params)
+    result: Response = make_request(
+        method=method,
+        url=url,
+        headers=headers,
+        params=params,
+        timeout=kwargs.get("timeout")
+    )
 
     return result
 
 
-def spycloud_ato_search(search_type: str, query:str, **kwargs: Dict[str, Any]) -> Response:
+def spycloud_ato_search(search_type: str, query: str, **kwargs: Dict[str, Any]) -> Response:
     """Perform search against Spycloud's Consumer ATO API to query its vast collection of
         breach records and surrounding metadata
 
@@ -97,7 +103,7 @@ def spycloud_ato_search(search_type: str, query:str, **kwargs: Dict[str, Any]) -
 
     # These are valid endpoints and their corresponding full URLs. We'll use these
     # to check that the user passed a valid 'search_type' parameter
-    base_url: str = f'https://api.spycloud.io/sp-v2/breach/data'
+    base_url: str = 'https://api.spycloud.io/sp-v2/breach/data'
     valid_endpoints: Dict[str, str] = {
         'domain': f'{base_url}/domains',
         'email': f'{base_url}/emails',
@@ -121,12 +127,18 @@ def spycloud_ato_search(search_type: str, query:str, **kwargs: Dict[str, Any]) -
     }
     params: Dict = dict(kwargs)
 
-    result: Response = make_request(method=method, url=url, headers=headers, params=params)
+    result: Response = make_request(
+        method=method,
+        url=url,
+        headers=headers,
+        params=params,
+        timeout=kwargs.get("timeout")
+    )
 
     return result
 
 
-def spycloud_inv_search(search_type: str, query:str, **kwargs: Dict[str, Any]) -> Response:
+def spycloud_inv_search(search_type: str, query: str, **kwargs: Dict[str, Any]) -> Response:
     """Perform search against Spycloud's Investigations API to query its vast collection of
         breach records and surrounding metadata
 
@@ -185,6 +197,12 @@ def spycloud_inv_search(search_type: str, query:str, **kwargs: Dict[str, Any]) -
     }
     params: Dict = dict(kwargs)
 
-    result: Response = make_request(method=method, url=url, headers=headers, params=params)
+    result: Response = make_request(
+        method=method,
+        url=url,
+        headers=headers,
+        params=params,
+        timeout=kwargs.get("timeout")
+    )
 
     return result

@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import datetime
 from dotenv import dotenv_values, find_dotenv
 import os
 import sys
@@ -24,6 +24,7 @@ def check_required_env_vars(config: Dict[str, str], required_vars: List[str]) ->
               'system\'s environment variables.', file=sys.stderr)
         sys.exit(1)
 
+
 def combine_env_configs() -> Dict[str, Any]:
     """Find a .env file if it exists, and combine it with system environment
         variables to form a "combined_config" dictionary of environment variables
@@ -38,6 +39,7 @@ def combine_env_configs() -> Dict[str, Any]:
     combined_config: Dict[str, Any] = {**env_config, **dict(os.environ)}
 
     return combined_config
+
 
 def validate_date_string(date_str: str) -> bool:
     """Validates that a date string is, well, a valid date string

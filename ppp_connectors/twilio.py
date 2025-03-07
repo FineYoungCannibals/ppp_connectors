@@ -9,7 +9,8 @@ from .helpers import check_required_env_vars, combine_env_configs, validate_date
 
 env_config: Dict[str, Any] = combine_env_configs()
 
-def twilio_lookup(phone_number: str, data_packages: list=[], **kwargs: Dict[str, Any]) -> Response:
+
+def twilio_lookup(phone_number: str, data_packages: list = [], **kwargs: Dict[str, Any]) -> Response:
     """query information on a phone number so that you can make a trusted interaction with your user.
         With this endpoint, you can format and validate phone numbers with the free Basic Lookup request
         and add on data packages to get even more in-depth carrier and caller information.
@@ -39,7 +40,7 @@ def twilio_lookup(phone_number: str, data_packages: list=[], **kwargs: Dict[str,
                                 'line_type_intelligence', 'identity_match', 'reassigned_number',
                                 'sms_pumping_risk', 'phone_number_quality_score', 'pre_fill'}
     data_packages_set: Set = set(data_packages)
-    invalid_packages =  data_packages_set - valid_data_packages
+    invalid_packages = data_packages_set - valid_data_packages
     if len(invalid_packages) != 0:
         print(f'[!] Error: "{", ".join(invalid_packages)}" are not valid data packages. Valid '
               f'packages include {", ".join(valid_data_packages)}', file=sys.stderr)
@@ -55,12 +56,19 @@ def twilio_lookup(phone_number: str, data_packages: list=[], **kwargs: Dict[str,
         **kwargs
     }
 
-    result: Response = make_request(method=method, url=url, auth=auth, params=params)
+    result: Response = make_request(
+        method=method,
+        url=url,
+        auth=auth,
+        params=params,
+        timeout=kwargs.get("timeout")
+    )
 
     return result
 
+
 def twilio_usage_report(start_date: Union[str, date],
-                        end_date: Optional[Union[str, date]]=None) -> Response:
+                        end_date: Optional[Union[str, date]] = None) -> Response:
     """Return a usage report for all activities between the start_date and end_date.
 
     Args:
@@ -91,7 +99,6 @@ def twilio_usage_report(start_date: Union[str, date],
               'does not match the format YYYY-MM-DD')
         sys.exit()
 
-
     method: str = 'get'
     url: str = f'https://api.twilio.com/2010-04-01/Accounts/{env_config["TWILIO_ACCOUNT_SID"]}/Usage/Records.json'
 
@@ -102,6 +109,11 @@ def twilio_usage_report(start_date: Union[str, date],
         'EndDate': end_date
     }
 
-    result: Response = make_request(method=method, url=url, auth=auth, params=params)
+    result: Response = make_request(
+        method=method,
+        url=url,
+        auth=auth,
+        params=params
+    )
 
     return result

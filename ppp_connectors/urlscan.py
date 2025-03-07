@@ -5,6 +5,7 @@ from .helpers import check_required_env_vars, combine_env_configs
 
 env_config: Dict[str, Any] = combine_env_configs()
 
+
 def urlscan_search(query: str, **kwargs: Dict[str, Any]) -> Response:
     """Find archived scans of URLs on urlscan.io. Search query syntax can
         be found at https://urlscan.io/docs/search/
@@ -25,7 +26,7 @@ def urlscan_search(query: str, **kwargs: Dict[str, Any]) -> Response:
     check_required_env_vars(env_config, required_vars)
 
     method: str = 'get'
-    url: str = f'https://urlscan.io/api/v1/search/'
+    url: str = 'https://urlscan.io/api/v1/search/'
     headers: Dict = {
         'accept': 'application/json',
         'API-Key': env_config['URLSCAN_API_KEY']
@@ -35,9 +36,16 @@ def urlscan_search(query: str, **kwargs: Dict[str, Any]) -> Response:
         **kwargs
     }
 
-    result: Response = make_request(method=method, url=url, headers=headers, params=params)
+    result: Response = make_request(
+        method=method,
+        url=url,
+        headers=headers,
+        params=params,
+        timeout=kwargs.get("timeout")
+    )
 
     return result
+
 
 def urlscan_scan(query: str, **kwargs: Dict[str, Any]) -> Response:
     """Submit a URL to be scanned
@@ -67,9 +75,16 @@ def urlscan_scan(query: str, **kwargs: Dict[str, Any]) -> Response:
         **kwargs
     }
 
-    result: Response = make_request(method=method, url=url, headers=headers, json=payload)
+    result: Response = make_request(
+        method=method,
+        url=url,
+        headers=headers,
+        json=payload,
+        timeout=kwargs.get("timeout")
+    )
 
     return result
+
 
 def urlscan_results(uuid: str, **kwargs: Dict[str, Any]) -> Response:
     """Retrieve results of a URLScan scan
@@ -97,6 +112,12 @@ def urlscan_results(uuid: str, **kwargs: Dict[str, Any]) -> Response:
     }
     params: Dict = dict(kwargs)
 
-    result: Response = make_request(method=method, url=url, headers=headers, params=params)
+    result: Response = make_request(
+        method=method,
+        url=url,
+        headers=headers,
+        params=params,
+        timeout=kwargs.get("timeout")
+    )
 
     return result

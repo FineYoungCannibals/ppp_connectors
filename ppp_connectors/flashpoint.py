@@ -6,6 +6,7 @@ from .helpers import check_required_env_vars, combine_env_configs
 
 env_config: Dict[str, Any] = combine_env_configs()
 
+
 def flashpoint_search_communities(query: str, **kwargs: Dict[str, Any]) -> Response:
     """Communities Search allows search requests over article and conversation data.
     Article data is made up of things like blogs and paste sites. Conversation data
@@ -37,9 +38,16 @@ def flashpoint_search_communities(query: str, **kwargs: Dict[str, Any]) -> Respo
         **kwargs
     }
 
-    result: Response = make_request(method=method, url=url, headers=headers, json=payload)
+    result: Response = make_request(
+        method=method,
+        url=url,
+        headers=headers,
+        json=payload,
+        timeout=kwargs.get("timeout")
+    )
 
     return result
+
 
 def flashpoint_search_media(query: str, **kwargs: Dict[str, Any]) -> Response:
     """Media search allows search requests over our media data, specifically
@@ -73,9 +81,16 @@ def flashpoint_search_media(query: str, **kwargs: Dict[str, Any]) -> Response:
         **kwargs
     }
 
-    result: Response = make_request(method=method, url=url, headers=headers, json=payload)
+    result: Response = make_request(
+        method=method,
+        url=url,
+        headers=headers,
+        json=payload,
+        timeout=kwargs.get("timeout")
+    )
 
     return result
+
 
 def flashpoint_get_media_object(id: str) -> Response:
     """Media ID request allows users to directly lookup the document based on the media ID provided.
@@ -102,9 +117,14 @@ def flashpoint_get_media_object(id: str) -> Response:
         'Authorization': f'Bearer {env_config["FLASHPOINT_API_KEY"]}'
     }
 
-    result: Response = make_request(method=method, url=url, headers=headers)
+    result: Response = make_request(
+        method=method,
+        url=url,
+        headers=headers
+    )
 
     return result
+
 
 def flashpoint_get_media_image(storage_uri: str) -> Response:
     """Download the media from a media object by its storage_uri field
@@ -124,7 +144,7 @@ def flashpoint_get_media_image(storage_uri: str) -> Response:
     check_required_env_vars(env_config, required_vars)
 
     method: str = 'get'
-    url: str = f'https://api.flashpoint.io/sources/v1/media/'
+    url: str = 'https://api.flashpoint.io/sources/v1/media/'
     headers: Dict = {
         'accept': 'application/json',
         'content-type': 'application/json',
@@ -135,6 +155,11 @@ def flashpoint_get_media_image(storage_uri: str) -> Response:
         "asset_id": storage_uri
     }
 
-    result: Response = make_request(method=method, url=url, headers=headers, params=params)
+    result: Response = make_request(
+        method=method,
+        url=url,
+        headers=headers,
+        params=params
+    )
 
     return result
