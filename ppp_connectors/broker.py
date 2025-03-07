@@ -1,4 +1,3 @@
-import sys
 from typing import Callable, Dict, Any, List
 import requests
 from requests.auth import HTTPBasicAuth
@@ -15,7 +14,8 @@ def make_request(
     auth: HTTPBasicAuth = None,
     params: Dict[str, Any] = None,
     data: Dict[str, Any] = None,
-    json: Dict[str, Any] = None
+    json: Dict[str, Any] = None,
+    timeout: int = 15
 ) -> requests.Response:
     """Perform an HTTP request on behalf of a calling function
 
@@ -62,11 +62,14 @@ def make_request(
     if not request_func:
         raise ValueError(f'Unsupported HTTP method: {method}')
 
-    return request_func(url,
-                        headers=headers,
-                        auth=auth,
-                        params=params,
-                        data=data,
-                        json=json,
-                        proxies=proxies,
-                        verify=verify)
+    return request_func(
+        url,
+        headers=headers,
+        auth=auth,
+        params=params,
+        data=data,
+        json=json,
+        proxies=proxies,
+        verify=verify,
+        timeout=timeout
+    )
