@@ -49,6 +49,89 @@ def flashpoint_search_communities(query: str, **kwargs: Dict[str, Any]) -> Respo
     return result
 
 
+def flashpoint_search_fraud(query: str, **kwargs: Dict[str, Any]) -> Response:
+    """Fraud search helps fraud teams at card-issuing banks detect compromised
+    credit cards from illicit communities and data breaches. It also helps identify
+    high-risk merchants over our different card fraud data types.
+
+    Args:
+        query (str): A word or phrase to search
+
+    Returns:
+        Response: requests.Response object from the request
+    """
+
+    required_vars: List[str] = [
+        'FLASHPOINT_API_KEY'
+    ]
+
+    # Check and ensure that required variables are present, exits if not
+    check_required_env_vars(env_config, required_vars)
+
+    method: str = 'post'
+    url: str = 'https://api.flashpoint.io/sources/v2/fraud'
+    headers: Dict = {
+        'accept': 'application/json',
+        'content-type': 'application/json',
+        'Authorization': f'Bearer {env_config["FLASHPOINT_API_KEY"]}'
+    }
+    payload: Dict = {
+        'query': query,
+        **kwargs
+    }
+
+    result: Response = make_request(
+        method=method,
+        url=url,
+        headers=headers,
+        json=payload,
+        timeout=kwargs.get("timeout")
+    )
+
+    return result
+
+
+def flashpoint_search_marketplaces(query: str, **kwargs: Dict[str, Any]) -> Response:
+
+    """Markets search allows search requests over our different market places data.
+
+    Args:
+        query (str): A word or phrase to search
+
+    Returns:
+        Response: requests.Response object from the request
+    """
+
+    required_vars: List[str] = [
+        'FLASHPOINT_API_KEY'
+    ]
+
+    # Check and ensure that required variables are present, exits if not
+    check_required_env_vars(env_config, required_vars)
+
+    method: str = 'post'
+    url: str = 'https://api.flashpoint.io/sources/v2/markets'
+    headers: Dict = {
+        'accept': 'application/json',
+        'content-type': 'application/json',
+        'Authorization': f'Bearer {env_config["FLASHPOINT_API_KEY"]}'
+    }
+    payload: Dict = {
+        'query': query,
+        **kwargs
+    }
+
+    result: Response = make_request(
+        method=method,
+        url=url,
+        headers=headers,
+        json=payload,
+        timeout=kwargs.get("timeout")
+    )
+
+    return result
+
+
 def flashpoint_search_media(query: str, **kwargs: Dict[str, Any]) -> Response:
     """Media search allows search requests over our media data, specifically
     media that have been through our Optical Character Recogintion (OCR) process.
