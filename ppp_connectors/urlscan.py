@@ -121,3 +121,32 @@ def urlscan_results(uuid: str, **kwargs: Dict[str, Any]) -> Response:
     )
 
     return result
+
+
+def urlscan_get_dom(uuid: str, **kwargs: Dict[str, Any]) -> Response:
+    """Retrieve the DOM from a scan result
+
+    Args:
+        uuid (str): the unique ID of the scan
+
+    Returns:
+        Response: requests.Response json response from the request
+    """
+
+    method: str = 'get'
+    url: str = f'https://urlscan.io/dom/{uuid}'
+    headers: Dict = {
+        'accept': 'application/json',
+        'API-Key': env_config['URLSCAN_API_KEY']
+    }
+    params: Dict = dict(kwargs)
+
+    result: Response = make_request(
+        method=method,
+        url=url,
+        headers=headers,
+        params=params,
+        timeout=kwargs.get("timeout")
+    )
+
+    return result
