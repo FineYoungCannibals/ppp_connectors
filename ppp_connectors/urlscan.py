@@ -150,3 +150,31 @@ def urlscan_get_dom(uuid: str, **kwargs: Dict[str, Any]) -> Response:
     )
 
     return result
+
+
+def urlscan_structure_search(uuid: str, **kwargs: Dict[str, Any]) -> Response:
+    # Define required environment variables
+    required_vars: List[str] = [
+        'URLSCAN_API_KEY'
+    ]
+
+    # Check and ensure that required variables are present, exits if not
+    check_required_env_vars(env_config, required_vars)
+
+    method: str = 'get'
+    url: str = f'https://urlscan.io/api/v1/pro/result/{uuid}/similar'
+    headers: Dict = {
+        'accept': 'application/json',
+        'API-Key': env_config['URLSCAN_API_KEY']
+    }
+    params: Dict = dict(kwargs)
+
+    result: Response = make_request(
+        method=method,
+        url=url,
+        headers=headers,
+        params=params,
+        timeout=kwargs.get("timeout")
+    )
+
+    return result
