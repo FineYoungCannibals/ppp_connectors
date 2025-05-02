@@ -1,7 +1,7 @@
 from typing import Callable, Dict, Any, List
 import requests
 from requests.auth import HTTPBasicAuth
-from .helpers import check_required_env_vars, combine_env_configs
+from ppp_connectors.helpers import check_required_env_vars, combine_env_configs
 
 
 env_config: Dict[str, Any] = combine_env_configs()

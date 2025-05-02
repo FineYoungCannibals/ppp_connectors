@@ -1,8 +1,8 @@
 from typing import Dict, Any, List
 from requests import Response
 import sys
-from .broker import make_request
-from .helpers import check_required_env_vars, combine_env_configs
+from ppp_connectors.broker import make_request
+from ppp_connectors.helpers import check_required_env_vars, combine_env_configs
 
 
 env_config: Dict[str, Any] = combine_env_configs()
