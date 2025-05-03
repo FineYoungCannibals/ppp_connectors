@@ -12,6 +12,7 @@ def generic_api_call(
     json: Optional[Dict[str, Any]] = None,
     auth: Optional[Any] = None,
     timeout: int = 15,
+    **kwargs
 ) -> Response:
     """
     Generic wrapper around the broker"s make_request function.
@@ -36,5 +37,6 @@ def generic_api_call(
         params=params,
         data=data,
         json=json,
-        timeout=timeout
+        timeout=timeout,
+        **kwargs
     )
