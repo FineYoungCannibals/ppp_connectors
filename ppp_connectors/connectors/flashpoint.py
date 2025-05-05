@@ -1,10 +1,7 @@
 from typing import Dict, Any, List
 from requests import Response
-from .broker import make_request
-from .helpers import check_required_env_vars, combine_env_configs
-
-
-env_config: Dict[str, Any] = combine_env_configs()
+from ppp_connectors.broker import make_request
+from ppp_connectors.helpers import check_required_env_vars, combine_env_configs
 
 
 def flashpoint_search_communities(query: str, **kwargs: Dict[str, Any]) -> Response:
@@ -18,6 +15,8 @@ def flashpoint_search_communities(query: str, **kwargs: Dict[str, Any]) -> Respo
     Returns:
         Response: requests.Response object from the request
     """
+
+    env_config: Dict[str, Any] = combine_env_configs()
 
     required_vars: List[str] = [
         'FLASHPOINT_API_KEY'
@@ -61,6 +60,8 @@ def flashpoint_search_fraud(query: str, **kwargs: Dict[str, Any]) -> Response:
         Response: requests.Response object from the request
     """
 
+    env_config: Dict[str, Any] = combine_env_configs()
+
     required_vars: List[str] = [
         'FLASHPOINT_API_KEY'
     ]
@@ -101,6 +102,8 @@ def flashpoint_search_marketplaces(query: str, **kwargs: Dict[str, Any]) -> Resp
     Returns:
         Response: requests.Response object from the request
     """
+
+    env_config: Dict[str, Any] = combine_env_configs()
 
     required_vars: List[str] = [
         'FLASHPOINT_API_KEY'
@@ -145,6 +148,8 @@ def flashpoint_search_media(query: str, **kwargs: Dict[str, Any]) -> Response:
         Response: requests.Response object from the request
     """
 
+    env_config: Dict[str, Any] = combine_env_configs()
+
     required_vars: List[str] = [
         'FLASHPOINT_API_KEY'
     ]
@@ -185,6 +190,8 @@ def flashpoint_get_media_object(id: str) -> Response:
         Response: requests.Response object from the request
     """
 
+    env_config: Dict[str, Any] = combine_env_configs()
+
     required_vars: List[str] = [
         'FLASHPOINT_API_KEY'
     ]
@@ -218,6 +225,8 @@ def flashpoint_get_media_image(storage_uri: str) -> Response:
     Returns:
         Response: requests.Response object from the request
     """
+
+    env_config: Dict[str, Any] = combine_env_configs()
 
     required_vars: List[str] = [
         'FLASHPOINT_API_KEY'

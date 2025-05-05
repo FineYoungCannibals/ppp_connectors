@@ -1,10 +1,8 @@
 from typing import Dict, Any, List
 from requests import Response
 from urllib.parse import quote
-from .broker import make_request
-from .helpers import check_required_env_vars, combine_env_configs
-
-env_config: Dict[str, Any] = combine_env_configs()
+from ppp_connectors.broker import make_request
+from ppp_connectors.helpers import check_required_env_vars, combine_env_configs
 
 
 def ipqs_malicious_url(query: str, **kwargs: Dict[str, Any]) -> Response:
@@ -20,6 +18,8 @@ def ipqs_malicious_url(query: str, **kwargs: Dict[str, Any]) -> Response:
     Returns:
         Response: requests.Response json response from the request
     """
+
+    env_config: Dict[str, Any] = combine_env_configs()
 
     # Define required environment variables
     required_vars: List[str] = [

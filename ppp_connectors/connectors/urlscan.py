@@ -1,9 +1,7 @@
 from typing import Dict, Any, List
 from requests import Response
-from .broker import make_request
-from .helpers import check_required_env_vars, combine_env_configs
-
-env_config: Dict[str, Any] = combine_env_configs()
+from ppp_connectors.broker import make_request
+from ppp_connectors.helpers import check_required_env_vars, combine_env_configs
 
 
 def urlscan_search(query: str, **kwargs: Dict[str, Any]) -> Response:
@@ -16,6 +14,8 @@ def urlscan_search(query: str, **kwargs: Dict[str, Any]) -> Response:
     Returns:
         Response: requests.Response json response from the request
     """
+
+    env_config: Dict[str, Any] = combine_env_configs()
 
     # Define required environment variables
     required_vars: List[str] = [
@@ -57,6 +57,8 @@ def urlscan_scan(query: str, **kwargs: Dict[str, Any]) -> Response:
         Response: requests.Response json response from the request
     """
 
+    env_config: Dict[str, Any] = combine_env_configs()
+
     required_vars: List[str] = [
         'URLSCAN_API_KEY'
     ]
@@ -96,6 +98,8 @@ def urlscan_results(uuid: str, **kwargs: Dict[str, Any]) -> Response:
         Response: requests.Response json response from the request
     """
 
+    env_config: Dict[str, Any] = combine_env_configs()
+
     # Define required environment variables
     required_vars: List[str] = [
         'URLSCAN_API_KEY'
@@ -133,6 +137,8 @@ def urlscan_get_dom(uuid: str, **kwargs: Dict[str, Any]) -> Response:
         Response: requests.Response json response from the request
     """
 
+    env_config: Dict[str, Any] = combine_env_configs()
+
     method: str = 'get'
     url: str = f'https://urlscan.io/dom/{uuid}'
     headers: Dict = {
@@ -153,6 +159,9 @@ def urlscan_get_dom(uuid: str, **kwargs: Dict[str, Any]) -> Response:
 
 
 def urlscan_structure_search(uuid: str, **kwargs: Dict[str, Any]) -> Response:
+
+    env_config: Dict[str, Any] = combine_env_configs()
+
     # Define required environment variables
     required_vars: List[str] = [
         'URLSCAN_API_KEY'

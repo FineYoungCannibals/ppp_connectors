@@ -1,11 +1,8 @@
 from typing import Dict, Any, List
 from requests import Response
 import sys
-from .broker import make_request
-from .helpers import check_required_env_vars, combine_env_configs
-
-
-env_config: Dict[str, Any] = combine_env_configs()
+from ppp_connectors.broker import make_request
+from ppp_connectors.helpers import check_required_env_vars, combine_env_configs
 
 
 def spycloud_sip_cookie_domains(cookie_domains: str, **kwargs: Dict[str, Any]) -> Response:
@@ -20,6 +17,8 @@ def spycloud_sip_cookie_domains(cookie_domains: str, **kwargs: Dict[str, Any]) -
     Returns:
         Response: requests.Response object from the request
     """
+
+    env_config: Dict[str, Any] = combine_env_configs()
 
     # Define required environment variables
     required_vars: List[str] = [
@@ -51,6 +50,8 @@ def spycloud_ato_breach_catalog(query: str, **kwargs: Dict[str, Any]) -> Respons
     Returns:
         Response: requests.Response object from the request
     """
+
+    env_config: Dict[str, Any] = combine_env_configs()
 
     # Define required environment variables
     required_vars: List[str] = [
@@ -93,6 +94,8 @@ def spycloud_ato_search(search_type: str, query: str, **kwargs: Dict[str, Any]) 
     Returns:
         Response: requests.Response object from the request
     """
+
+    env_config: Dict[str, Any] = combine_env_configs()
 
     required_vars: List[str] = [
         'SPYCLOUD_API_ATO_KEY'
@@ -151,6 +154,8 @@ def spycloud_inv_search(search_type: str, query: str, **kwargs: Dict[str, Any]) 
     Returns:
         Response: requests.Response object from the request
     """
+
+    env_config: Dict[str, Any] = combine_env_configs()
 
     # Define required environment variables
     required_vars: List[str] = [
