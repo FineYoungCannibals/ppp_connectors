@@ -7,9 +7,6 @@ from ppp_connectors.broker import make_request
 from ppp_connectors.helpers import check_required_env_vars, combine_env_configs, validate_date_string
 
 
-env_config: Dict[str, Any] = combine_env_configs()
-
-
 def twilio_lookup(phone_number: str, data_packages: list = [], **kwargs: Dict[str, Any]) -> Response:
     """query information on a phone number so that you can make a trusted interaction with your user.
         With this endpoint, you can format and validate phone numbers with the free Basic Lookup request
@@ -24,6 +21,8 @@ def twilio_lookup(phone_number: str, data_packages: list = [], **kwargs: Dict[st
     Returns:
         Response: requests.Response json response from the request
     """
+
+    env_config: Dict[str, Any] = combine_env_configs()
 
     # Define required environment variables
     required_vars: List[str] = [
@@ -80,6 +79,8 @@ def twilio_usage_report(start_date: Union[str, date],
     Returns:
         Response: requests.Response json response from the request
     """
+
+    env_config: Dict[str, Any] = combine_env_configs()
 
     # Define required environment variables
     required_vars: List[str] = [

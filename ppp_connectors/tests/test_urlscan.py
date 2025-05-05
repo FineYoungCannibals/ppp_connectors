@@ -1,11 +1,5 @@
 from unittest.mock import patch, MagicMock
-from ppp_connectors.connectors.urlscan import (
-    urlscan_search,
-    urlscan_scan,
-    urlscan_results,
-    urlscan_get_dom,
-    urlscan_structure_search
-)
+from ppp_connectors.connectors import urlscan
 
 
 def mock_response():
@@ -16,28 +10,28 @@ def mock_response():
 
 
 @patch("ppp_connectors.connectors.urlscan.make_request", return_value=mock_response())
-@patch("ppp_connectors.connectors.urlscan.combine_env_configs", return_value={"URLSCAN_API_KEY": "dummy_key"})
 @patch("ppp_connectors.connectors.urlscan.check_required_env_vars")
-def test_urlscan_search(mock_check, mock_env, mock_request):
-    resp = urlscan_search("example.com")
+@patch("ppp_connectors.connectors.urlscan.combine_env_configs", return_value={"URLSCAN_API_KEY": "dummy_key"})
+def test_urlscan_search(mock_env, mock_check, mock_request):
+    resp = urlscan.urlscan_search("example.com")
     assert resp.status_code == 200
     mock_request.assert_called_once()
 
 
 @patch("ppp_connectors.connectors.urlscan.make_request", return_value=mock_response())
-@patch("ppp_connectors.connectors.urlscan.combine_env_configs", return_value={"URLSCAN_API_KEY": "dummy_key"})
 @patch("ppp_connectors.connectors.urlscan.check_required_env_vars")
-def test_urlscan_scan(mock_check, mock_env, mock_request):
-    resp = urlscan_scan("http://example.com")
+@patch("ppp_connectors.connectors.urlscan.combine_env_configs", return_value={"URLSCAN_API_KEY": "dummy_key"})
+def test_urlscan_scan(mock_env, mock_check, mock_request):
+    resp = urlscan.urlscan_scan("http://example.com")
     assert resp.status_code == 200
     mock_request.assert_called_once()
 
 
 @patch("ppp_connectors.connectors.urlscan.make_request", return_value=mock_response())
-@patch("ppp_connectors.connectors.urlscan.combine_env_configs", return_value={"URLSCAN_API_KEY": "dummy_key"})
 @patch("ppp_connectors.connectors.urlscan.check_required_env_vars")
-def test_urlscan_results(mock_check, mock_env, mock_request):
-    resp = urlscan_results("uuid-example")
+@patch("ppp_connectors.connectors.urlscan.combine_env_configs", return_value={"URLSCAN_API_KEY": "dummy_key"})
+def test_urlscan_results(mock_env, mock_check, mock_request):
+    resp = urlscan.urlscan_results("uuid-example")
     assert resp.status_code == 200
     mock_request.assert_called_once()
 
@@ -45,15 +39,15 @@ def test_urlscan_results(mock_check, mock_env, mock_request):
 @patch("ppp_connectors.connectors.urlscan.make_request", return_value=mock_response())
 @patch("ppp_connectors.connectors.urlscan.combine_env_configs", return_value={"URLSCAN_API_KEY": "dummy_key"})
 def test_urlscan_get_dom(mock_env, mock_request):
-    resp = urlscan_get_dom("uuid-example")
+    resp = urlscan.urlscan_get_dom("uuid-example")
     assert resp.status_code == 200
     mock_request.assert_called_once()
 
 
 @patch("ppp_connectors.connectors.urlscan.make_request", return_value=mock_response())
-@patch("ppp_connectors.connectors.urlscan.combine_env_configs", return_value={"URLSCAN_API_KEY": "dummy_key"})
 @patch("ppp_connectors.connectors.urlscan.check_required_env_vars")
-def test_urlscan_structure_search(mock_check, mock_env, mock_request):
-    resp = urlscan_structure_search("uuid-example")
+@patch("ppp_connectors.connectors.urlscan.combine_env_configs", return_value={"URLSCAN_API_KEY": "dummy_key"})
+def test_urlscan_structure_search(mock_env, mock_check, mock_request):
+    resp = urlscan.urlscan_structure_search("uuid-example")
     assert resp.status_code == 200
     mock_request.assert_called_once()
