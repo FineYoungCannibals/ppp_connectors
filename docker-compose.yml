@@ -1,0 +1,43 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./dev_env/mongo/init.js:/docker-entrypoint-initdb.d/init.js:ro
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.10
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+    mem_limit: 512m
+
+  splunk:
+    image: vivekrsplunk/splunk:9.2.1-78803f08aabb-ef8f72f-arm64-ubuntu-20
+    container_name: splunk
+    environment:
+      - SPLUNK_START_ARGS=--accept-license
+      - SPLUNK_PASSWORD=admin123
+    ports:
+      - "8000:8000" # Web UI
+      - "8088:8088" # HEC
+    volumes:
+      - ./dev_env/splunk/init_app.sh:/init_app.sh
+    entrypoint: [ "/bin/bash", "-c", "/sbin/entrypoint.sh start-service && /init_app.sh" ]
+
+  odbc_db:
+    image: postgres:15-alpine
+    container_name: odbc_db
+    environment:
+      POSTGRES_USER: testuser
+      POSTGRES_PASSWORD: testpass
+      POSTGRES_DB: testdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./dev_env/odbc/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
