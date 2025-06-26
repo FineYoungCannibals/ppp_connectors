@@ -11,21 +11,31 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.10
     container_name: elasticsearch
     environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
+      discovery.type: single-node
+      xpack.security.enabled: false
     ports:
       - "9200:9200"
     mem_limit: 512m
+
+  es-init:
+    image: python:3.11-slim
+    depends_on:
+      - elasticsearch
+    volumes:
+      - ./dev_env/elasticsearch/init.py:/init.py:ro
+    entrypoint: >
+      sh -c "pip install --quiet requests && python /init.py"
 
   splunk:
     image: vivekrsplunk/splunk:9.2.1-78803f08aabb-ef8f72f-arm64-ubuntu-20
     container_name: splunk
     environment:
-      - SPLUNK_START_ARGS=--accept-license
-      - SPLUNK_PASSWORD=admin123
+      SPLUNK_START_ARGS: --accept-license
+      SPLUNK_PASSWORD: admin123
     ports:
       - "8000:8000" # Web UI
       - "8088:8088" # HEC
+      - "8089:8089"
     volumes:
       - ./dev_env/splunk/init_app.sh:/init_app.sh
     entrypoint: [ "/bin/bash", "-c", "/sbin/entrypoint.sh start-service && /init_app.sh" ]
