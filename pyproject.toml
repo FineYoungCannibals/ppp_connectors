@@ -13,6 +13,10 @@ readme = "README.md"
 python = "^3.10"
 python-dotenv = "^1.0.1"
 requests = "^2.32.3"
+pymongo = "^4.13.2"
+elasticsearch = "^9.0.2"
+splunk-sdk = "^2.1.0"
+pyodbc = "^5.2.0"
 
 [tool.poetry.group.dev.dependencies]
 python-dotenv = "^1.0.1"
