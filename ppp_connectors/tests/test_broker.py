@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch, MagicMock
 from requests.auth import HTTPBasicAuth
-from ppp_connectors import broker
+from ppp_connectors.connectors import broker
 
 BASE_URL = "https://api.example.com/resource"
 
@@ -20,7 +20,7 @@ def mock_check_env_vars(monkeypatch):
     monkeypatch.setattr(broker, "check_required_env_vars", lambda *args, **kwargs: None)
 
 
-@patch("ppp_connectors.broker.requests.get")
+@patch("ppp_connectors.connectors.broker.requests.get")
 def test_make_get_request(mock_get, mock_env, mock_check_env_vars):
     mock_response = MagicMock(status_code=200)
     mock_get.return_value = mock_response
@@ -44,7 +44,7 @@ def test_make_get_request(mock_get, mock_env, mock_check_env_vars):
     assert result.status_code == 200
 
 
-@patch("ppp_connectors.broker.requests.post")
+@patch("ppp_connectors.connectors.broker.requests.post")
 def test_make_post_with_json(mock_post, mock_env, mock_check_env_vars):
     mock_response = MagicMock(status_code=201)
     mock_post.return_value = mock_response
@@ -55,7 +55,7 @@ def test_make_post_with_json(mock_post, mock_env, mock_check_env_vars):
     assert result.status_code == 201
 
 
-@patch("ppp_connectors.broker.requests.get")
+@patch("ppp_connectors.connectors.broker.requests.get")
 def test_make_request_with_auth(mock_get, mock_env, mock_check_env_vars):
     mock_response = MagicMock(status_code=200)
     mock_get.return_value = mock_response
