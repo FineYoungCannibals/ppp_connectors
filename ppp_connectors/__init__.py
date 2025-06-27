@@ -1,3 +1,4 @@
+# API connectors
 from ppp_connectors.connectors import (
     urlscan,
     spycloud,
@@ -7,4 +8,24 @@ from ppp_connectors.connectors import (
     generic,
 )
 
-__all__ = ["urlscan", "spycloud", "twilio", "flashpoint", "ipqs", "generic"]
+# DBMS connectors
+from ppp_connectors.dbms import (
+    elasticsearch,
+    mongo,
+    odbc,
+    splunk
+)
+
+# Export the modules and re-exports
+__all__ = [
+    "elasticsearch",
+    "flashpoint",
+    "generic",
+    "ipqs",
+    "mongo",
+    "odbc",
+    "splunk",
+    "spycloud",
+    "twilio",
+    "urlscan",
+]
