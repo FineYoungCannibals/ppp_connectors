@@ -1,16 +1,15 @@
-from dotenv import load_dotenv, find_dotenv
 from ppp_connectors.dbms import splunk
-import os
+from ppp_connectors.helpers import combine_env_configs
+from typing import Dict, Any
 
-load_dotenv(find_dotenv(filename=".env"))
-
+env_config: Dict[str, Any] = combine_env_configs()
 
 service = splunk.get_splunk_service(
-    host=os.getenv("SPLUNK_HOST"),
-    port=int(os.getenv("SPLUNK_PORT")),
-    username=os.getenv("SPLUNK_USER"),
-    password=os.getenv("SPLUNK_PASS"),
-    scheme=os.getenv("SPLUNK_SCHEME", "https"),
+    host=env_config["SPLUNK_HOST"],
+    port=int(env_config["SPLUNK_PORT"]),
+    username=env_config["SPLUNK_USER"],
+    password=env_config["SPLUNK_PASS"],
+    scheme=env_config["SPLUNK_SCHEME"],
     verify=False
 )
 

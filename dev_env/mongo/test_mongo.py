@@ -1,11 +1,11 @@
-from dotenv import load_dotenv, find_dotenv
 from ppp_connectors.dbms import mongo
-import os
+from ppp_connectors.helpers import combine_env_configs
+from typing import Dict, Any
 
-load_dotenv(find_dotenv(filename=".env"))
+env_config: Dict[str, Any] = combine_env_configs()
 
-client = mongo.get_mongo_client(os.getenv("MONGO_URI"))
-col = mongo.get_collection(client, os.getenv("MONGO_DB"), os.getenv("MONGO_COLLECTION"))
+client = mongo.get_mongo_client(f'mongodb://{env_config["MONGO_USER"]}:{env_config["MONGO_PASS"]}@{env_config["MONGO_URI"]}')
+col = mongo.get_collection(client, env_config["MONGO_DB"], env_config["MONGO_COLLECTION"])
 
 print("Querying first 10 docs:")
 for i, doc in enumerate(mongo.mongo_query_paged(col, {}, batch_size=5)):

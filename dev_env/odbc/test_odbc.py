@@ -1,10 +1,10 @@
-from dotenv import load_dotenv, find_dotenv
 from ppp_connectors.dbms import odbc
-import os
+from ppp_connectors.helpers import combine_env_configs
+from typing import Dict, Any
 
-load_dotenv(find_dotenv(filename=".env"))
+env_config: Dict[str, Any] = combine_env_configs()
 
-conn = odbc.get_odbc_connection(os.getenv("ODBC_CONN_STR"))
+conn = odbc.get_odbc_connection(env_config["ODBC_CONN_STR"])
 
 base_query = "SELECT * FROM employees"  # adjust
 print("Querying with pagination:")
