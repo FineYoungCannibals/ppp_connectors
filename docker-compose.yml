@@ -6,13 +6,17 @@ services:
       - "27017:27017"
     volumes:
       - ./dev_env/mongo/init.js:/docker-entrypoint-initdb.d/init.js:ro
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASS}
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.10
     container_name: elasticsearch
     environment:
       discovery.type: single-node
-      xpack.security.enabled: false
+      xpack.security.enabled: true
+      ELASTIC_PASSWORD: ${ES_PASS}
     ports:
       - "9200:9200"
     mem_limit: 512m
@@ -23,15 +27,17 @@ services:
       - elasticsearch
     volumes:
       - ./dev_env/elasticsearch/init.py:/init.py:ro
+    env_file:
+      - ./.env
     entrypoint: >
-      sh -c "pip install --quiet requests && python /init.py"
+      sh -c "pip install --quiet requests python-dotenv && python /init.py"
 
   splunk:
     image: vivekrsplunk/splunk:9.2.1-78803f08aabb-ef8f72f-arm64-ubuntu-20
     container_name: splunk
     environment:
       SPLUNK_START_ARGS: --accept-license
-      SPLUNK_PASSWORD: admin123
+      SPLUNK_PASSWORD: ${SPLUNK_PASS}
     ports:
       - "8000:8000" # Web UI
       - "8088:8088" # HEC
@@ -44,9 +50,9 @@ services:
     image: postgres:15-alpine
     container_name: odbc_db
     environment:
-      POSTGRES_USER: testuser
-      POSTGRES_PASSWORD: testpass
-      POSTGRES_DB: testdb
+      POSTGRES_USER: ${PSQL_USER}
+      POSTGRES_PASSWORD: ${PSQL_PASS}
+      POSTGRES_DB: ${PSQL_DB}
     ports:
       - "5432:5432"
     volumes:
