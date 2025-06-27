@@ -1,6 +1,6 @@
 from typing import Dict, Any, Optional
 from requests import Response
-from ppp_connectors.broker import make_request
+from ppp_connectors.connectors.broker import make_request
 
 
 def generic_api_call(
@@ -15,7 +15,7 @@ def generic_api_call(
     **kwargs
 ) -> Response:
     """
-    Generic wrapper around the broker"s make_request function.
+    Generic wrapper around the broker's make_request function.
 
     This allows you to hit any arbitrary API endpoint without a dedicated connector.
 
