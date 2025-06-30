@@ -1,71 +1,80 @@
-from typing import List, Dict, Any, Generator
-import pyodbc
+from pymongo import MongoClient
+from typing import List, Dict, Any, Optional, Generator
 
 
-class ODBCConnector:
+class MongoConnector:
     """
-    A connector class for interacting with ODBC-compatible databases.
+    A connector class for interacting with MongoDB.
 
-    Provides methods for paginated queries and bulk inserts.
+    Provides methods for querying documents with paging and for performing bulk insert operations.
     """
-    def __init__(self, conn_str: str):
+    def __init__(
+        self,
+        uri: str,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
+        auth_source: str = "admin"
+    ):
         """
-        Initialize the ODBC connection.
+        Initialize the MongoDB client.
 
         Args:
-            conn_str (str): The ODBC connection string.
+            uri (str): The MongoDB connection URI.
+            username (Optional[str]): Username for authentication. Defaults to None.
+            password (Optional[str]): Password for authentication. Defaults to None.
+            auth_source (str): The authentication database. Defaults to "admin".
         """
-        self.conn = pyodbc.connect(conn_str)
-        self.cursor = self.conn.cursor()
+        self.client = MongoClient(
+            uri,
+            username=username,
+            password=password,
+            authSource=auth_source
+        )
 
     def query(
         self,
-        base_query: str,
-        page_size: int = 1000,
-        use_limit_offset: bool = True
+        db_name: str,
+        collection: str,
+        query: Dict,
+        projection: Optional[Dict] = None,
+        batch_size: int = 1000
     ) -> Generator[Dict[str, Any], None, None]:
         """
-        Execute a paginated query against an ODBC database.
+        Execute a paginated query against a MongoDB collection.
 
         Args:
-            base_query (str): The base SQL query.
-            page_size (int): Number of rows per batch. Defaults to 1000.
-            use_limit_offset (bool): Whether to use LIMIT/OFFSET for paging. Defaults to True.
+            db_name (str): Name of the database.
+            collection (str): Name of the collection.
+            query (Dict): MongoDB query filter.
+            projection (Optional[Dict]): Fields to include or exclude. Defaults to None.
+            batch_size (int): Number of documents per batch. Defaults to 1000.
 
         Yields:
-            Dict[str, Any]: Each row as a dictionary.
+            Dict[str, Any]: Each document as a dictionary.
         """
-        offset = 0
-        while True:
-            if use_limit_offset:
-                paged_query = f"{base_query} LIMIT {page_size} OFFSET {offset}"
-            else:
-                paged_query = base_query
-            self.cursor.execute(paged_query)
-            columns = [column[0] for column in self.cursor.description]
-            rows = self.cursor.fetchmany(page_size)
-            if not rows:
-                break
-            for row in rows:
-                yield dict(zip(columns, row))
-            offset += page_size
+        col = self.client[db_name][collection]
+        cursor = col.find(query, projection).batch_size(batch_size)
+        for doc in cursor:
+            yield doc
 
-    def bulk_insert(self, table: str, data: List[Dict]):
+    def bulk_insert(
+        self,
+        db_name: str,
+        collection: str,
+        data: List[Dict],
+        ordered: bool = False
+    ):
         """
-        Perform a bulk insert into an ODBC database table.
+        Perform a bulk insert operation into a MongoDB collection.
 
         Args:
-            table (str): Name of the table to insert into.
-            data (List[Dict]): List of rows to insert.
+            db_name (str): Name of the database.
+            collection (str): Name of the collection.
+            data (List[Dict]): List of documents to insert.
+            ordered (bool): Whether the insert operations should be ordered. Defaults to False.
 
         Returns:
-            None
+            InsertManyResult: The result of the bulk insert operation.
         """
-        if not data:
-            return
-        columns = data[0].keys()
-        placeholders = ", ".join(["?"] * len(columns))
-        insert_sql = f"INSERT INTO {table} ({', '.join(columns)}) VALUES ({placeholders})"
-        values = [tuple(row[col] for col in columns) for row in data]
-        self.cursor.executemany(insert_sql, values)
-        self.conn.commit()
+        col = self.client[db_name][collection]
+        return col.insert_many(data, ordered=ordered)

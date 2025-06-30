@@ -22,3 +22,4 @@ results = client.query(
 
 for row in results:
     print(row)
+
