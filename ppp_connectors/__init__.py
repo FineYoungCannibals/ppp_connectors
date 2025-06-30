@@ -9,7 +9,7 @@ from ppp_connectors.connectors import (
 )
 
 # DBMS connectors
-from ppp_connectors.dbms import (
+from ppp_connectors.dbms_connectors import (
     elasticsearch,
     mongo,
     odbc,
