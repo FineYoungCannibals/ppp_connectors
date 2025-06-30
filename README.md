@@ -110,3 +110,118 @@ To set up a local development environment:
    ```
 
 Environment variables should be stored in `dev_env/.env` or loaded in your shell.
+# ppp_connectors
+
+A clean, lightweight set of connectors and utilities for interacting with APIs and DBMS backends. Designed for modular use with clear separation between API and DBMS connectors, supporting both functional and class-based patterns where appropriate.
+
+## Installation
+
+```
+pip install ppp-connectors
+```
+
+Load environment variables from `dev_env/.env` or your shell environment as needed.
+
+## API connectors
+
+API connectors provide simple functional interfaces that use internal brokers to perform requests.
+
+Example:
+
+```python
+from ppp_connectors.urlscan import urlscan_search
+
+result = urlscan_search('domain:example.com', size=100)
+print(result.json())
+```
+
+## DBMS connectors
+
+DBMS connectors are now **class-based**, enabling connection reuse, transaction support, and advanced DBMS-specific features. Optional functional wrappers are provided for convenience.
+
+### MongoDB
+
+```python
+from ppp_connectors.dbms_connectors.mongo import MongoConnector
+
+conn = MongoConnector("mongodb://localhost:27017", username="root", password="example")
+for doc in conn.query("testdb", "testcol", {"foo": "bar"}):
+    print(doc)
+
+conn.bulk_insert("testdb", "testcol", [{"foo": "bar"}])
+```
+
+### Elasticsearch
+
+```python
+from ppp_connectors.dbms_connectors.elasticsearch import ElasticsearchConnector
+
+conn = ElasticsearchConnector(["http://localhost:9200"], username="elastic", password="examplepassword")
+for hit in conn.query("test-index", {"query": {"match_all": {}}}):
+    print(hit)
+
+conn.bulk_insert("test-index", [{"_id": 1, "foo": "bar"}])
+```
+
+### ODBC
+
+```python
+from ppp_connectors.dbms_connectors.odbc import ODBCConnector
+
+conn = ODBCConnector("DSN=PostgresLocal;UID=postgres;PWD=postgres")
+for row in conn.query("SELECT * FROM my_table"):
+    print(row)
+
+conn.bulk_insert("my_table", [{"col1": "val1", "col2": "val2"}])
+```
+
+### Splunk
+
+```python
+from ppp_connectors.dbms_connectors.splunk import SplunkConnector
+
+conn = SplunkConnector("localhost", 8089, "admin", "admin123", scheme="https", verify=False)
+for result in conn.query("search index=_internal | head 10"):
+    print(result)
+```
+
+## Local development
+
+1. Clone the repo:
+   ```
+   git clone https://github.com/FineYoungCannibals/ppp_connectors.git
+   cd ppp_connectors
+   ```
+
+2. Create a virtual environment:
+   ```
+   python -m venv .venv
+   source .venv/bin/activate
+   ```
+
+3. Install dependencies:
+   ```
+   poetry install
+   ```
+
+4. Run tests:
+   ```
+   pytest
+   ```
+
+5. Lint and format:
+   ```
+   black .
+   flake8 .
+   ```
+
+6. Launch Docker dev environment:
+   ```
+   docker-compose up -d
+   ```
+
+## Notes
+
+- API connectors still use a central broker pattern.
+- DBMS connectors are class-based to support advanced DBMS features.
+- Functional helpers are available for quick, stateless operations.
