@@ -3,7 +3,19 @@ from typing import List, Dict, Generator, Any
 
 
 class ODBCConnector:
+    """
+    A connector class for interacting with ODBC-compatible databases.
+
+    Provides methods for paginated queries and bulk inserts.
+    """
+
     def __init__(self, conn_str: str):
+        """
+        Initialize the ODBC connection.
+
+        Args:
+            conn_str (str): The ODBC connection string.
+        """
         self.conn = pyodbc.connect(conn_str)
 
     def query(
@@ -12,6 +24,17 @@ class ODBCConnector:
         page_size: int = 1000,
         use_limit_offset: bool = True
     ) -> Generator[Dict[str, Any], None, None]:
+        """
+        Execute a paginated query against an ODBC database.
+
+        Args:
+            base_query (str): The base SQL query.
+            page_size (int): Number of rows per batch. Defaults to 1000.
+            use_limit_offset (bool): Whether to use LIMIT/OFFSET for paging. Defaults to True.
+
+        Yields:
+            Dict[str, Any]: Each row as a dictionary.
+        """
         cursor = self.conn.cursor()
         offset = 0
         while True:
@@ -29,6 +52,16 @@ class ODBCConnector:
             offset += page_size
 
     def bulk_insert(self, table: str, data: List[Dict[str, Any]]):
+        """
+        Perform a bulk insert into an ODBC database table.
+
+        Args:
+            table (str): Name of the table to insert into.
+            data (List[Dict[str, Any]]): List of rows to insert.
+
+        Returns:
+            None
+        """
         if not data:
             return
         columns = list(data[0].keys())
