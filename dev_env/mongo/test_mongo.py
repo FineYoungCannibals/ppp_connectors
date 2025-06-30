@@ -1,17 +1,31 @@
-from ppp_connectors.dbms import mongo
+from ppp_connectors.dbms_connectors.mongo import MongoConnector
 from ppp_connectors.helpers import combine_env_configs
 from typing import Dict, Any
 
 env_config: Dict[str, Any] = combine_env_configs()
 
-client = mongo.get_mongo_client(f'mongodb://{env_config["MONGO_USER"]}:{env_config["MONGO_PASS"]}@{env_config["MONGO_URI"]}')
-col = mongo.get_collection(client, env_config["MONGO_DB"], env_config["MONGO_COLLECTION"])
+print("Connecting to Mongo")
+client = MongoConnector(
+    uri=env_config["MONGO_URI"],
+    username=env_config["MONGO_USER"],
+    password=env_config["MONGO_PASS"]
+)
 
-print("Querying first 10 docs:")
-for i, doc in enumerate(mongo.mongo_query_paged(col, {}, batch_size=5)):
-    print(doc)
-    if i >= 9:
-        break
 
 print("Inserting two test docs...")
-mongo.mongo_bulk_insert(col, [{"test": 1}, {"test": 2}])
+client.bulk_insert(
+    env_config["MONGO_DB"],
+    env_config["MONGO_COLLECTION"],
+    [{"test": 1}, {"test": 2}]
+)
+
+
+print("Performing a test query")
+for i, doc in enumerate(client.query(
+    db_name=env_config["MONGO_DB"],
+    collection=env_config["MONGO_COLLECTION"],
+    query={},
+    projection=None,
+    batch_size=100
+)):
+    print(doc)
