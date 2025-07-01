@@ -4,6 +4,48 @@ from ppp_connectors.broker import make_request
 from ppp_connectors.helpers import check_required_env_vars, combine_env_configs
 
 
+def flashpoint_search_checks(query: str, **kwargs: Dict[str, Any]) -> Response:
+    """Checks search provides the ability to search and read data from our Checks dataset.
+
+    Args:
+        query (str): a word or phrase to search
+
+    Returns:
+        Response: requests.Response object from the request
+    """
+
+    env_config: Dict[str, Any] = combine_env_configs()
+
+    required_vars: List[str] = [
+        'FLASHPOINT_API_KEY'
+    ]
+
+    # Check and ensure that required variables are present, exits if not
+    check_required_env_vars(env_config, required_vars)
+
+    method: str = 'post'
+    url: str = 'https://api.flashpoint.io/sources/v2/fraud/checks'
+    headers: Dict = {
+        'accept': 'application/json',
+        'content-type': 'application/json',
+        'Authorization': f'Bearer {env_config["FLASHPOINT_API_KEY"]}'
+    }
+    payload: Dict = {
+        'query': query,
+        **kwargs
+    }
+
+    result: Response = make_request(
+        method=method,
+        url=url,
+        headers=headers,
+        json=payload,
+        timeout=kwargs.get("timeout")
+    )
+
+    return result
+
+
 def flashpoint_search_communities(query: str, **kwargs: Dict[str, Any]) -> Response:
     """Communities Search allows search requests over article and conversation data.
     Article data is made up of things like blogs and paste sites. Conversation data
