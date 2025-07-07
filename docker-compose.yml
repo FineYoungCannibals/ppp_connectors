@@ -35,6 +35,7 @@ services:
   splunk:
     image: vivekrsplunk/splunk:9.2.1-78803f08aabb-ef8f72f-arm64-ubuntu-20
     container_name: splunk
+    user: "0:0"
     environment:
       SPLUNK_START_ARGS: --accept-license
       SPLUNK_PASSWORD: ${SPLUNK_PASS}
@@ -44,7 +45,7 @@ services:
       - "8089:8089"
     volumes:
       - ./dev_env/splunk/init_app.sh:/init_app.sh
-    entrypoint: [ "/bin/bash", "-c", "/sbin/entrypoint.sh start-service && /init_app.sh" ]
+    entrypoint: [ "/bin/bash", "-c", "/init_app.sh & /sbin/entrypoint.sh start-service" ]
 
   odbc_db:
     image: postgres:15-alpine

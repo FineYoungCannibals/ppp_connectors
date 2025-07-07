@@ -5,7 +5,6 @@ from typing import Dict, Any
 env_config: Dict[str, Any] = combine_env_configs()
 
 
-print(env_config)
 service = SplunkConnector(
     host=env_config["SPLUNK_HOST"],
     port=int(env_config["SPLUNK_PORT"]),
