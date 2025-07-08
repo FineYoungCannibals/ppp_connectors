@@ -1,5 +1,6 @@
 import pyodbc
 from typing import List, Dict, Generator, Any
+from ppp_connectors.helpers import setup_logger
 
 
 class ODBCConnector:
@@ -7,16 +8,24 @@ class ODBCConnector:
     A connector class for interacting with ODBC-compatible databases.
 
     Provides methods for paginated queries and bulk inserts.
+    Logs actions if a logger is provided.
     """
 
-    def __init__(self, conn_str: str):
+    def __init__(self, conn_str: str, logger: Any = None):
         """
         Initialize the ODBC connection.
 
         Args:
             conn_str (str): The ODBC connection string.
+            logger (Any, optional): Logger instance for logging. Defaults to None.
         """
         self.conn = pyodbc.connect(conn_str)
+        self.logger = logger or setup_logger(__name__)
+
+    def _log(self, msg: str, level: str = "info"):
+        if self.logger:
+            log_method = getattr(self.logger, level, self.logger.info)
+            log_method(msg)
 
     def query(
         self,
@@ -34,7 +43,11 @@ class ODBCConnector:
 
         Yields:
             Dict[str, Any]: Each row as a dictionary.
+
+        Logs:
+            Execution details of the paginated query.
         """
+        self._log(f"Executing paginated ODBC query with page size {page_size}")
         cursor = self.conn.cursor()
         offset = 0
         while True:
@@ -61,9 +74,13 @@ class ODBCConnector:
 
         Returns:
             None
+
+        Logs:
+            Number of rows inserted and target table.
         """
         if not data:
             return
+        self._log(f"Inserting {len(data)} rows into table {table}")
         columns = list(data[0].keys())
         placeholders = ", ".join(["?"] * len(columns))
         insert_query = f"INSERT INTO {table} ({', '.join(columns)}) VALUES ({placeholders})"

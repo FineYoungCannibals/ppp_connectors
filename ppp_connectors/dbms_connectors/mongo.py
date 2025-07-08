@@ -1,5 +1,6 @@
 from pymongo import MongoClient
 from typing import List, Dict, Any, Optional, Generator
+from ppp_connectors.helpers import setup_logger
 
 
 class MongoConnector:
@@ -7,13 +8,24 @@ class MongoConnector:
     A connector class for interacting with MongoDB.
 
     Provides methods for querying documents with paging and for performing bulk insert operations.
+    Logs actions if a logger is provided.
+
+    Args:
+        uri (str): The MongoDB connection URI.
+        username (Optional[str]): Username for authentication. Defaults to None.
+        password (Optional[str]): Password for authentication. Defaults to None.
+        auth_source (str): The authentication database. Defaults to "admin".
+        timeout (int): Server selection timeout in seconds. Defaults to 10.
+        logger (Optional[Any]): Logger instance for logging actions. Defaults to None.
     """
     def __init__(
         self,
         uri: str,
         username: Optional[str] = None,
         password: Optional[str] = None,
-        auth_source: str = "admin"
+        auth_source: str = "admin",
+        timeout: int = 10,
+        logger: Optional[Any] = None
     ):
         """
         Initialize the MongoDB client.
@@ -23,13 +35,29 @@ class MongoConnector:
             username (Optional[str]): Username for authentication. Defaults to None.
             password (Optional[str]): Password for authentication. Defaults to None.
             auth_source (str): The authentication database. Defaults to "admin".
+            timeout (int): Server selection timeout in seconds. Defaults to 10.
+            logger (Optional[Any]): Logger instance for logging actions. Defaults to None.
         """
         self.client = MongoClient(
             uri,
             username=username,
             password=password,
-            authSource=auth_source
+            authSource=auth_source,
+            serverSelectionTimeoutMS=timeout * 1000
         )
+        self.logger = logger or setup_logger(__name__)
+
+    def _log(self, msg: str, level: str = "info"):
+        """
+        Internal helper method for logging.
+
+        Args:
+            msg (str): The message to log.
+            level (str): Logging level as string (e.g., "info", "debug"). Defaults to "info".
+        """
+        if self.logger:
+            log_method = getattr(self.logger, level, self.logger.info)
+            log_method(msg)
 
     def query(
         self,
@@ -51,7 +79,11 @@ class MongoConnector:
 
         Yields:
             Dict[str, Any]: Each document as a dictionary.
+
+        Logs:
+            Logs the query execution with filter details.
         """
+        self._log(f"Executing Mongo query on {db_name}.{collection} with filter: {query}")
         col = self.client[db_name][collection]
         cursor = col.find(query, projection).batch_size(batch_size)
         for doc in cursor:
@@ -75,6 +107,10 @@ class MongoConnector:
 
         Returns:
             InsertManyResult: The result of the bulk insert operation.
+
+        Logs:
+            Logs the number of documents being inserted.
         """
+        self._log(f"Inserting {len(data)} documents into {db_name}.{collection}")
         col = self.client[db_name][collection]
         return col.insert_many(data, ordered=ordered)

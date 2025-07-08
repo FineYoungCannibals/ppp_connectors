@@ -1,5 +1,6 @@
 import requests
 from typing import Generator, Dict, Any, Optional
+from ppp_connectors.helpers import setup_logger
 
 
 class SplunkConnector:
@@ -12,11 +13,12 @@ class SplunkConnector:
         self,
         host: str,
         port: int,
-        username: str,
-        password: str,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
         scheme: str = "https",
         verify: bool = True,
-        timeout: int = 30
+        timeout: int = 30,
+        logger: Optional[Any] = None
     ):
         """
         Initialize the SplunkConnector with connection details.
@@ -24,16 +26,28 @@ class SplunkConnector:
         Args:
             host (str): The Splunk server host.
             port (int): The Splunk management port.
-            username (str): Username for authentication.
-            password (str): Password for authentication.
+            username (Optional[str]): Username for authentication. Defaults to None.
+            password (Optional[str]): Password for authentication. Defaults to None.
             scheme (str): HTTP or HTTPS. Defaults to "https".
             verify (bool): Whether to verify SSL certificates. Defaults to True.
             timeout (int): Request timeout in seconds. Defaults to 30.
+            logger (Optional[Any]): Logger instance. If provided, actions will be logged.
         """
         self.base_url = f"{scheme}://{host}:{port}"
         self.auth = (username, password)
         self.verify = verify
         self.timeout = timeout
+        self.logger = logger or setup_logger(__name__)
+
+        # Suppress InsecureRequestWarnings if the user sets verify=False
+        if not self.verify:
+            import urllib3
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+    def _log(self, msg: str, level: str = "info"):
+        if self.logger:
+            log_method = getattr(self.logger, level, self.logger.info)
+            log_method(msg)
 
     def query(
         self,
@@ -53,8 +67,11 @@ class SplunkConnector:
 
         Yields:
             Dict[str, Any]: Each search result as a dictionary.
+
+        Logs actions if logger is enabled.
         """
         # 1️⃣ Create job
+        self._log(f"Submitting search job: {search}")
         data = {
             "search": search,
             "output_mode": "json",
@@ -77,6 +94,7 @@ class SplunkConnector:
 
         # 2️⃣ Poll until ready
         while True:
+            self._log(f"Polling job {sid} status...")
             status_resp = requests.get(
                 f"{self.base_url}/services/search/jobs/{sid}",
                 auth=self.auth,
@@ -92,6 +110,7 @@ class SplunkConnector:
         # 3️⃣ Fetch results
         offset = 0
         while True:
+            self._log(f"Fetching results batch starting at offset {offset}")
             results_resp = requests.get(
                 f"{self.base_url}/services/search/jobs/{sid}/results",
                 auth=self.auth,
