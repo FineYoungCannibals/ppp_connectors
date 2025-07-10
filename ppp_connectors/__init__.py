@@ -1,5 +1,5 @@
 # API connectors
-from ppp_connectors.connectors import (
+from ppp_connectors.api_connectors import (
     urlscan,
     spycloud,
     twilio,
