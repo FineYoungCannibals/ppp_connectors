@@ -42,4 +42,4 @@ class IPQSConnector(Broker):
             dict: Parsed JSON response from the IPQS API.
         """
         encoded_query: str = quote(query, safe="")
-        return self.post(f"/url/{self.api_key}/{encoded_query}", json=kwargs).json()
+        return self.post(f"/url/", json={"url": query, "key": self.api_key, **kwargs}).json()
