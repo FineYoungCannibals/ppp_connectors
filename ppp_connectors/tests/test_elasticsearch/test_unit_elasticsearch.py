@@ -1,5 +1,3 @@
-
-
 import unittest
 from unittest.mock import patch, MagicMock
 from ppp_connectors.dbms_connectors.elasticsearch import ElasticsearchConnector

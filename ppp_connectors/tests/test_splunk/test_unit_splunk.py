@@ -1,5 +1,5 @@
 import pytest
-import requests
+import httpx
 from unittest.mock import patch, MagicMock
 from ppp_connectors.dbms_connectors.splunk import SplunkConnector
 
@@ -15,8 +15,8 @@ def connector():
     )
 
 
-@patch("requests.post")
-@patch("requests.get")
+@patch("httpx.post")
+@patch("httpx.get")
 def test_query_success(mock_get, mock_post, connector):
     # Mock POST /services/search/jobs
     post_response = MagicMock()
@@ -46,11 +46,11 @@ def test_query_success(mock_get, mock_post, connector):
     assert results[1]["baz"] == "qux"
 
 
-@patch("requests.post")
+@patch("httpx.post")
 def test_query_auth_error(mock_post, connector):
     mock_response = MagicMock()
-    mock_response.raise_for_status.side_effect = requests.HTTPError("401 Unauthorized")
+    mock_response.raise_for_status.side_effect = httpx.HTTPError("401 Unauthorized")
     mock_post.return_value = mock_response
 
-    with pytest.raises(requests.HTTPError):
+    with pytest.raises(httpx.HTTPError):
         list(connector.query("search index=_internal | head 1"))
