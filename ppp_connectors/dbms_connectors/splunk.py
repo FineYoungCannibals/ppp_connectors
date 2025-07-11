@@ -1,4 +1,4 @@
-import requests
+import httpx
 from typing import Generator, Dict, Any, Optional
 from ppp_connectors.helpers import setup_logger
 
@@ -82,7 +82,7 @@ class SplunkConnector:
         if latest_time:
             data["latest_time"] = latest_time
 
-        create_resp = requests.post(
+        create_resp = httpx.post(
             f"{self.base_url}/services/search/jobs",
             auth=self.auth,
             data=data,
@@ -95,7 +95,7 @@ class SplunkConnector:
         # 2️⃣ Poll until ready
         while True:
             self._log(f"Polling job {sid} status...")
-            status_resp = requests.get(
+            status_resp = httpx.get(
                 f"{self.base_url}/services/search/jobs/{sid}",
                 auth=self.auth,
                 params={"output_mode": "json"},
@@ -111,7 +111,7 @@ class SplunkConnector:
         offset = 0
         while True:
             self._log(f"Fetching results batch starting at offset {offset}")
-            results_resp = requests.get(
+            results_resp = httpx.get(
                 f"{self.base_url}/services/search/jobs/{sid}/results",
                 auth=self.auth,
                 params={
