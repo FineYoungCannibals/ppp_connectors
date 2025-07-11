@@ -13,14 +13,12 @@ class TwilioConnector(Broker):
 
     def __init__(
         self,
-        account_sid: Optional[str] = None,
         api_sid: Optional[str] = None,
         api_secret: Optional[str] = None,
         **kwargs
     ):
         super().__init__(base_url="https://lookups.twilio.com/v2", **kwargs)
 
-        self.account_sid = account_sid or self.env_config.get("TWILIO_ACCOUNT_SID")
         self.api_sid = api_sid or self.env_config.get("TWILIO_API_SID")
         self.api_secret = api_secret or self.env_config.get("TWILIO_API_SECRET")
 
