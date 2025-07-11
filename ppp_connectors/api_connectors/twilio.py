@@ -18,7 +18,7 @@ class TwilioConnector(Broker):
         api_secret: Optional[str] = None,
         **kwargs
     ):
-        super().__init__(base_url="", **kwargs)
+        super().__init__(base_url="https://lookups.twilio.com/v2", **kwargs)
 
         self.account_sid = account_sid or self.env_config.get("TWILIO_ACCOUNT_SID")
         self.api_sid = api_sid or self.env_config.get("TWILIO_API_SID")
@@ -56,33 +56,5 @@ class TwilioConnector(Broker):
             **kwargs
         }
 
-        url = f"https://lookups.twilio.com/v2/PhoneNumbers/{phone_number}"
-        return self._make_request("get", endpoint=url, auth=self.auth, params=params).json()
-
-    def usage_report(self, start_date: Union[str, date], end_date: Optional[Union[str, date]] = None) -> Dict[str, Any]:
-        """
-        Generate a usage report from Twilio's Usage API.
-
-        Args:
-            start_date (str or date): Start date in YYYY-MM-DD format.
-            end_date (str or date, optional): End date in YYYY-MM-DD format. Defaults to today.
-
-        Returns:
-            dict: JSON usage report.
-        """
-        if not self.account_sid:
-            raise ValueError("TWILIO_ACCOUNT_SID is required to generate usage reports.")
-
-        if end_date is None:
-            end_date = datetime.now().strftime("%Y-%m-%d")
-
-        if not validate_date_string(start_date) or not validate_date_string(end_date):
-            raise ValueError("Start or end date is not in YYYY-MM-DD format")
-
-        params = {
-            "StartDate": str(start_date),
-            "EndDate": str(end_date)
-        }
-
-        url = f"https://api.twilio.com/2010-04-01/Accounts/{self.account_sid}/Usage/Records.json"
-        return self._make_request("get", endpoint=url, auth=self.auth, params=params).json()
+        endpoint = f"/PhoneNumbers/{phone_number}"
+        return self._make_request("get", endpoint=endpoint, auth=self.auth, params=params).json()

@@ -43,6 +43,3 @@ class FlashpointConnector(Broker):
     def get_media_image(self, storage_uri: str) -> Dict[str, Any]:
         """Download image asset by storage_uri."""
         return self.get("/sources/v1/media/", params={"asset_id": storage_uri}).json()
-
-if __name__ == "___main__":
-    fp = FlashpointConnector(load_env_config=True)
