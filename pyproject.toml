@@ -1,12 +1,9 @@
 [tool.poetry]
 name = "ppp-connectors"
 packages = [{ include = "ppp_connectors" }]
-version = "0.5.1"
+version = "1.0.0"
 description = "A simple, lightweight set of connectors and functions to various APIs and DBMSs, controlled by a central broker."
-authors = [
-    "Rob D'Aveta <rob.daveta@gmail.com>",
-    "Aaron Buchanan <aaronbuchanan@gmail.com>",
-]
+authors = ["Rob D'Aveta <rob.daveta@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
