@@ -12,16 +12,18 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.10"
 python-dotenv = "^1.0.1"
-requests = "^2.32.3"
 pymongo = "^4.13.2"
 elasticsearch = "^9.0.2"
 splunk-sdk = "^2.1.0"
 pyodbc = "^5.2.0"
+httpx = "^0.28.1"
+tenacity = "^9.1.2"
 
 [tool.poetry.group.dev.dependencies]
 python-dotenv = "^1.0.1"
 pytest = "^8.3.2"
 pytest-mock = "^3.14.0"
+vcrpy = "^7.0.0"
 
 [build-system]
 requires = ["poetry-core"]
