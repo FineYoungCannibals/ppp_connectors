@@ -24,6 +24,9 @@ jobs:
     - name: Install dependencies
       run: poetry install
 
+    - name: Run tests
+      run: poetry run pytest
+
     - name: Check version
       run: |
         pkg_version=$(poetry version -s)

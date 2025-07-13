@@ -1,8 +1,9 @@
 from datetime import datetime
 from dotenv import dotenv_values, find_dotenv
+import logging
 import os
 import sys
-from typing import Dict, Set, List, Any
+from typing import Dict, Set, List, Any, Optional
 
 
 def check_required_env_vars(config: Dict[str, str], required_vars: List[str]) -> None:
@@ -55,3 +56,47 @@ def validate_date_string(date_str: str) -> bool:
         return True
     except ValueError:
         return False
+
+
+def setup_logger(
+    name: str = __name__,
+    level: int = logging.INFO,
+    log_file: Optional[str] = None,
+    use_stdout: bool = True
+) -> logging.Logger:
+    """
+    Configures and returns a logger with optional StreamHandler and/or FileHandler.
+
+    This function checks if a logger with the specified name already has any StreamHandler
+    or FileHandler attached, and if not, it adds them according to the parameters.
+
+    Args:
+        name (str): The name of the logger to configure.
+        level (int): The logging level to set for the logger. Defaults to logging.INFO.
+        log_file (Optional[str]): If provided, logs will be written to this file.
+        use_stdout (bool): Whether to log to standard output. Defaults to True.
+
+    Returns:
+        logging.Logger: A configured logger instance.
+    """
+    logger: logging.Logger = logging.getLogger(name)
+
+    logger.setLevel(level)
+
+    formatter = logging.Formatter(
+        '[%(asctime)s]\t%(levelname)s\t%(name)s:%(lineno)d\t%(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
+
+    if use_stdout and not any(isinstance(h, logging.StreamHandler) for h in logger.handlers):
+        stream_handler = logging.StreamHandler(sys.stdout)
+        stream_handler.setFormatter(formatter)
+        logger.addHandler(stream_handler)
+
+    if log_file and not any(isinstance(h, logging.FileHandler) for h in logger.handlers):
+        file_handler = logging.FileHandler(log_file)
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
+
+    logger.propagate = False
+    return logger
