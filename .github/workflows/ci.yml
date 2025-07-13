@@ -28,4 +28,11 @@ jobs:
         run: poetry install
 
       - name: Run tests
+        env:
+          FLASHPOINT_API_KEY: dummy
+          IPQS_API_KEY: dummy
+          SPYCLOUD_API_ATO_KEY: dummy
+          TWILIO_API_SID: dummy
+          TWILIO_API_SECRET: dummy
+          URLSCAN_API_KEY: dummy
         run: poetry run pytest --ignore=dev_env
