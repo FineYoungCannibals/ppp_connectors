@@ -103,10 +103,13 @@ conn.bulk_insert("mydb", "mycol", [{"foo": "bar"}])
 ### Elasticsearch
 
 ```python
+# The query method returns a generator; use list() or iterate to access results
 from ppp_connectors.dbms_connectors.elasticsearch import ElasticsearchConnector
 
 conn = ElasticsearchConnector(["http://localhost:9200"])
-conn.query("my-index", {"query": {"match_all": {}}})
+results = list(conn.query("my-index", {"query": {"match_all": {}}}))
+for doc in results:
+    print(doc)
 ```
 
 ### ODBC (e.g., Postgres, Teradata)
