@@ -1,5 +1,5 @@
 from elasticsearch import Elasticsearch, helpers
-from typing import List, Dict, Generator, Any, Optional
+from typing import List, Dict, Generator, Any, Optional, Union
 
 
 try:
@@ -57,7 +57,7 @@ class ElasticsearchConnector:
     def query(
         self,
         index: str,
-        query: Dict,
+        query: Union[str, Dict],
         size: int = 1000
     ) -> Generator[Dict[str, Any], None, None]:
         """
@@ -68,14 +68,29 @@ class ElasticsearchConnector:
 
         Args:
             index (str): The name of the index to search.
-            query (Dict): The Elasticsearch DSL query body.
+            query (Union[str, Dict]): A Lucene query string or Elasticsearch DSL query body.
             size (int): Number of results to retrieve per batch. Defaults to 1000.
 
         Yields:
-            Dict[str, Any]: Each search hit as a dictionary.
+            Generator[Dict[str, Any], None, None]: A generator that yields each search hit as a dictionary.
+
+        Note:
+            This method returns a generator. If you want to collect all results,
+            you can wrap the result in `list()`, but beware of memory usage if the
+            result set is large. Prefer streaming and processing results incrementally.
         """
 
         self._log(f"Executing query on index '{index}' with batch size {size}", "info")
+
+        if isinstance(query, str):
+            query = {
+                "query": {
+                    "query_string": {
+                        "query": query
+                    }
+                }
+            }
+
         page = self.client.search(index=index, body=query, scroll="2m", size=size)
         sid = page["_scroll_id"]
         hits = page["hits"]["hits"]
