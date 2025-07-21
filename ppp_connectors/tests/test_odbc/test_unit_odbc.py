@@ -1,5 +1,3 @@
-
-
 import pytest
 from unittest.mock import MagicMock, patch
 from ppp_connectors.dbms_connectors.odbc import ODBCConnector
@@ -15,16 +13,14 @@ def test_odbcconnector_init(mock_connect):
 
 @patch("pyodbc.connect")
 def test_odbcconnector_query_returns_rows(mock_connect):
+    """Test that query returns rows as dictionaries."""
     mock_cursor = MagicMock()
     mock_cursor.description = [("id",), ("name",)]
-    mock_cursor.fetchall.side_effect = [
-        [(1, "Alice"), (2, "Bob")],
-        []
-    ]
+    mock_cursor.fetchall.return_value = [(1, "Alice"), (2, "Bob")]
     mock_connect.return_value.cursor.return_value = mock_cursor
     connector = ODBCConnector("DSN=testdb")
 
-    results = list(connector.query("SELECT * FROM users", page_size=2))
+    results = list(connector.query("SELECT * FROM users"))
 
     assert results == [{"id": 1, "name": "Alice"}, {"id": 2, "name": "Bob"}]
 
@@ -51,3 +47,15 @@ def test_odbcconnector_bulk_insert_empty_data(mock_connect):
     connector.bulk_insert("users", [])
 
     mock_cursor.executemany.assert_not_called()
+
+
+@patch("pyodbc.connect")
+def test_odbcconnector_context_manager_closes_connection(mock_connect):
+    """Test that the context manager closes the connection."""
+    mock_conn = MagicMock()
+    mock_connect.return_value = mock_conn
+
+    with ODBCConnector("DSN=testdb") as connector:
+        assert isinstance(connector, ODBCConnector)
+
+    mock_conn.close.assert_called_once()
