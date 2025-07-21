@@ -15,7 +15,7 @@ conn.bulk_insert("employees", [{"name": "rob", "department": "hr"}])
 base_query = "SELECT * FROM employees"
 
 logger.info("Querying with pagination:")
-for i, row in enumerate(conn.query(base_query, page_size=10, use_limit_offset=True)):
+for i, row in enumerate(conn.query(base_query)):
     print(row)
     if i >= 9:
         break
