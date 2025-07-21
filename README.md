@@ -114,11 +114,25 @@ for doc in results:
 
 ### ODBC (e.g., Postgres, Teradata)
 
+For automatic connection handling, use `ODBCConnector` as a context manager
+
+```python
+from ppp_connectors.dbms_connectors.odbc import ODBCConnector
+
+with ODBCConnector("DSN=PostgresLocal;UID=postgres;PWD=postgres") as db:
+   rows = conn.query("SELECT * FROM my_table")
+   print(list(rows))
+```
+
+If you'd like to keep manual control, you can still use the `.close()` method
+
 ```python
 from ppp_connectors.dbms_connectors.odbc import ODBCConnector
 
 conn = ODBCConnector("DSN=PostgresLocal;UID=postgres;PWD=postgres")
 rows = conn.query("SELECT * FROM my_table")
+print(list(rows))
+conn.close()
 ```
 
 ### Splunk
