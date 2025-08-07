@@ -16,6 +16,8 @@ class MongoConnector:
         password (Optional[str]): Password for authentication. Defaults to None.
         auth_source (str): The authentication database. Defaults to "admin".
         timeout (int): Server selection timeout in seconds. Defaults to 10.
+        auth_mechanism (Optional[str]): Authentication mechanism for MongoDB (e.g., "SCRAM-SHA-1").
+        ssl (Optional[bool]): Whether to use SSL for the connection.
         logger (Optional[Any]): Logger instance for logging actions. Defaults to None.
     """
     def __init__(
@@ -25,6 +27,8 @@ class MongoConnector:
         password: Optional[str] = None,
         auth_source: str = "admin",
         timeout: int = 10,
+        auth_mechanism: Optional[str] = "DEFAULT",
+        ssl: Optional[bool] = True,
         logger: Optional[Any] = None
     ):
         """
@@ -36,16 +40,25 @@ class MongoConnector:
             password (Optional[str]): Password for authentication. Defaults to None.
             auth_source (str): The authentication database. Defaults to "admin".
             timeout (int): Server selection timeout in seconds. Defaults to 10.
+            auth_mechanism (Optional[str]): Authentication mechanism for MongoDB (e.g., "SCRAM-SHA-1").
+            ssl (Optional[bool]): Whether to use SSL for the connection.
             logger (Optional[Any]): Logger instance for logging actions. Defaults to None.
         """
+        # Initialize MongoClient with authSource, authMechanism, and ssl options
         self.client = MongoClient(
             uri,
             username=username,
             password=password,
             authSource=auth_source,
+            authMechanism=auth_mechanism,
+            ssl=ssl,
             serverSelectionTimeoutMS=timeout * 1000
         )
         self.logger = logger or setup_logger(__name__)
+        self._log(
+            f"Initialized MongoClient with authSource={auth_source}, "
+            f"authMechanism={auth_mechanism}, ssl={ssl}"
+        )
 
     def _log(self, msg: str, level: str = "info"):
         """

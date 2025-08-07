@@ -5,14 +5,16 @@ from typing import Dict, Any
 env_config: Dict[str, Any] = combine_env_configs()
 
 # Initialize logger
-logger = setup_logger(name="es_test", level="INFO")
+logger = setup_logger(name="mongo_test", level="INFO")
 
 print("Connecting to Mongo")
 client = MongoConnector(
     uri=env_config["MONGO_URI"],
     username=env_config["MONGO_USER"],
     password=env_config["MONGO_PASS"],
-    logger=logger
+    logger=logger,
+    auth_source="admin",
+    ssl=False
 )
 
 
