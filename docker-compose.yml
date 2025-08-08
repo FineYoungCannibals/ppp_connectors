@@ -58,3 +58,8 @@ services:
       - "5432:5432"
     volumes:
       - ./dev_env/odbc/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+  proxy:
+    image: ubuntu/squid:latest
+    ports:
+      - "3128:3128"

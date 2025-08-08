@@ -46,11 +46,50 @@ Environment variables are loaded automatically via the `combine_env_configs()` h
 
 ## 🔌 API Connectors
 
+
 All API connectors inherit from the shared `Broker` base class and:
 - Accept API credentials via env vars or constructor args
 - Send requests via `get`, `post`, etc.
 - Include support for logging, retry/backoff, and VCR integration
 - Support
+
+### Proxy Awareness
+
+API connectors inherit from the `Broker` class and support flexible proxy configuration for outgoing HTTP requests. You can set proxies in multiple ways:
+- a single `proxy` parameter (applies to all requests),
+- a per-scheme `mounts` parameter (e.g., separate proxies for `http` and `https` as a dictionary),
+- or environment variables (from `.env` or OS environment, specifically `HTTP_PROXY` and `HTTPS_PROXY`).
+
+**Proxy precedence:**
+`mounts` > `proxy` > environment source (`.env` via `load_env_vars=True`, else OS environment if `trust_env=True`) > none.
+
+- If you provide explicit `mounts`, these override all other proxy settings.
+- If you set `proxy`, it overrides environment proxies but is overridden by `mounts`.
+- If neither is set, and `load_env_vars=True`, proxy settings are loaded from `.env` via `combine_env_configs()`.
+    - If both `.env` and OS environment have the same variable, OS environment takes precedence.
+- If no explicit proxy or mounts are set but `trust_env=True`, HTTPX will use OS environment proxy settings (including `NO_PROXY`).
+
+**Examples:**
+
+*Using a single proxy:*
+```python
+from ppp_connectors.api_connectors.urlscan import URLScanConnector
+conn = URLScanConnector(proxy="http://myproxy:8080")
+```
+
+*Using per-scheme mounts:*
+```python
+conn = URLScanConnector(mounts={"https://": "http://myproxy:8080", "http://": "http://myproxy2:8888"})
+```
+
+*Loading proxy from `.env`:*
+```python
+# .env file contains: HTTP_PROXY="http://myproxy:8080"
+conn = URLScanConnector(load_env_vars=True)
+# Uses HTTP_PROXY from .env even if not in OS environment.
+```
+
+**Note:** Any changes to proxy settings require re-instantiating the connector for changes to take effect.
 
 ### Example (URLScan)
 
