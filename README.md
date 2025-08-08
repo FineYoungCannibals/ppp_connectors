@@ -51,7 +51,39 @@ All API connectors inherit from the shared `Broker` base class and:
 - Accept API credentials via env vars or constructor args
 - Send requests via `get`, `post`, etc.
 - Include support for logging, retry/backoff, and VCR integration
-- Support
+
+### Example (URLScan)
+
+```python
+from ppp_connectors.api_connectors.urlscan import URLScanConnector
+
+scanner = URLScanConnector(load_env_vars=True)
+result = scanner.scan(
+    url="https://example.com",
+    visibility="public",
+    tags=["example", "demo"],
+    custom={"foo": "bar"},  # Arbitrary API field passed via **kwargs
+    headers={"X-Custom-Header": "my-value"}  # httpx headers
+)
+print(result.json())
+```
+
+### Customizing API Requests with **kwargs
+
+All connector methods accept arbitrary keyword arguments using `**kwargs`. These arguments are passed directly to the underlying `httpx` request methods, enabling support for any feature available in [`httpx`](https://www.python-httpx.org/api/#request) — including custom headers, query parameters, timeouts, authentication, and more. Additionally, for APIs that accept arbitrary fields in their request body (like `URLScan`), these can also be passed as part of `**kwargs` and will be merged into the outgoing request. This enables full control over how API requests are constructed without needing to modify connector internals.
+
+#### Example (URLScan with custom headers and params)
+
+```python
+result = scanner.scan(
+    url="https://example.com",
+    visibility="unlisted",
+    headers={"X-Custom-Header": "my-value"},
+    params={"pretty": "true"}
+)
+```
+
+This pattern allows flexibility without needing to subclass or modify the connector.
 
 ### Proxy Awareness
 
@@ -91,38 +123,36 @@ conn = URLScanConnector(load_env_vars=True)
 
 **Note:** Any changes to proxy settings require re-instantiating the connector for changes to take effect.
 
-### Example (URLScan)
+### SSL Verification and Per-Request Options
 
+You can now pass any `httpx.Client` keyword arguments (such as `verify=False`, `http2=True`) when instantiating a connector. These options will be applied to all requests made by that connector.
+
+Additionally, per-request keyword arguments can be passed to methods like `.get()`, `.post()`, etc., and will be forwarded to `httpx.Client.request` for that single call.
+
+Setting `verify=False` disables SSL verification and can be useful for testing against servers with self-signed certificates, but **should not be used in production** unless you understand the security implications.
+
+**Examples:**
+
+*Disable SSL verification at the connector level:*
 ```python
-from ppp_connectors.api_connectors.urlscan import URLScanConnector
-
-scanner = URLScanConnector(load_env_vars=True)
-result = scanner.scan(
-    url="https://example.com",
-    visibility="public",
-    tags=["example", "demo"],
-    custom={"foo": "bar"},  # Arbitrary API field passed via **kwargs
-    headers={"X-Custom-Header": "my-value"}  # httpx headers
-)
-print(result.json())
+conn = URLScanConnector(verify=False)
+response = conn.get("https://self-signed.badssl.com/")
+print(response.status_code)
 ```
 
-### Customizing API Requests with **kwargs
-
-All connector methods accept arbitrary keyword arguments using `**kwargs`. These arguments are passed directly to the underlying `httpx` request methods, enabling support for any feature available in [`httpx`](https://www.python-httpx.org/api/#request) — including custom headers, query parameters, timeouts, authentication, and more. Additionally, for APIs that accept arbitrary fields in their request body (like `URLScan`), these can also be passed as part of `**kwargs` and will be merged into the outgoing request. This enables full control over how API requests are constructed without needing to modify connector internals.
-
-#### Example (URLScan with custom headers and params)
-
+*Disable SSL verification for a single request:*
 ```python
-result = scanner.scan(
-    url="https://example.com",
-    visibility="unlisted",
-    headers={"X-Custom-Header": "my-value"},
-    params={"pretty": "true"}
-)
+conn = URLScanConnector()
+response = conn.get("https://self-signed.badssl.com/", verify=False)
+print(response.status_code)
 ```
 
-This pattern allows flexibility without needing to subclass or modify the connector.
+*Enable HTTP/2:*
+```python
+conn = URLScanConnector(http2=True)
+response = conn.get("https://nghttp2.org/httpbin/get")
+print(response.http_version)
+```
 
 ---
 
