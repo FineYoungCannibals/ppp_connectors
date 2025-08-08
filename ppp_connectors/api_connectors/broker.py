@@ -41,6 +41,11 @@ class Broker:
 
         Note: Proxy settings are applied when the client is constructed and remain fixed for the
         lifetime of the instance. To change proxies or `trust_env`, re‑instantiate the connector.
+
+        Additionally, extra `httpx.Client` keyword arguments can be passed to the constructor via
+        `**client_kwargs` (e.g., `verify=False`, `http2=True`, custom transports). These are forwarded
+        to the underlying `httpx.Client` when the session is created. Per-request options can also be
+        supplied to `get`/`post` and will be forwarded to `httpx.Client.request`.
     """
     def __init__(
         self,
@@ -53,6 +58,7 @@ class Broker:
         proxy: Optional[str] = None,
         mounts: Optional[Dict[str, httpx.HTTPTransport]] = None,
         trust_env: bool = True,
+        **client_kwargs,
     ):
         self.base_url = base_url.rstrip('/')
         self.logger = setup_logger(self.__class__.__name__) if enable_logging else None
@@ -60,6 +66,7 @@ class Broker:
         self.timeout = timeout
         self.headers = headers or {}
         self.env_config = combine_env_configs() if load_env_vars else {}
+        self._client_kwargs = dict(client_kwargs) if client_kwargs else {}
 
         # Determine proxy configuration (HTTPX uses `proxy` or per-scheme `mounts`).
         # Priority: mounts > proxy > env source (.env via self.env_config, else os.environ when trust_env=True) > none
@@ -69,25 +76,37 @@ class Broker:
 
         if self.mounts:
             # Per-scheme routing wins
-            self.session = httpx.Client(timeout=timeout, mounts=self.mounts, trust_env=self.trust_env)
+            client_options = dict(self._client_kwargs)
+            client_options.pop("timeout", None)
+            self.session = httpx.Client(timeout=timeout, mounts=self.mounts, trust_env=self.trust_env, **client_options)
         elif self.proxy:
             # Single proxy URL
-            self.session = httpx.Client(timeout=timeout, proxy=self.proxy, trust_env=self.trust_env)
+            client_options = dict(self._client_kwargs)
+            client_options.pop("timeout", None)
+            self.session = httpx.Client(timeout=timeout, proxy=self.proxy, trust_env=self.trust_env, **client_options)
         else:
             # Try to resolve proxies from env sources (.env if loaded, else OS env if trust_env=True)
             env_proxy, env_mounts = self._collect_proxy_config()
             if env_mounts:
                 self.mounts = env_mounts
-                self.session = httpx.Client(timeout=timeout, mounts=self.mounts, trust_env=self.trust_env)
+                client_options = dict(self._client_kwargs)
+                client_options.pop("timeout", None)
+                self.session = httpx.Client(timeout=timeout, mounts=self.mounts, trust_env=self.trust_env, **client_options)
             elif env_proxy:
                 self.proxy = env_proxy
-                self.session = httpx.Client(timeout=timeout, proxy=self.proxy, trust_env=self.trust_env)
+                client_options = dict(self._client_kwargs)
+                client_options.pop("timeout", None)
+                self.session = httpx.Client(timeout=timeout, proxy=self.proxy, trust_env=self.trust_env, **client_options)
             elif self.trust_env:
                 # No explicit or .env proxies, but allow HTTPX to read real OS env (incl. NO_PROXY)
-                self.session = httpx.Client(timeout=timeout, trust_env=True)
+                client_options = dict(self._client_kwargs)
+                client_options.pop("timeout", None)
+                self.session = httpx.Client(timeout=timeout, trust_env=True, **client_options)
             else:
                 # Hard-disable env proxies
-                self.session = httpx.Client(timeout=timeout, trust_env=False)
+                client_options = dict(self._client_kwargs)
+                client_options.pop("timeout", None)
+                self.session = httpx.Client(timeout=timeout, trust_env=False, **client_options)
 
     def _log(self, message: str):
         """
@@ -150,6 +169,7 @@ class Broker:
         auth: Optional[Union[tuple, Auth]] = None,
         headers: Optional[Dict[str, str]] = None,
         retry_kwargs: Optional[Dict[str, Any]] = None,
+        **request_kwargs,
     ) -> httpx.Response:
         """
         Construct and execute an HTTP request with optional retries.
@@ -161,6 +181,8 @@ class Broker:
             json (Optional[Dict[str, Any]]): JSON body for the request.
             auth (Optional[tuple]): Optional basic auth tuple (username, password).
             retry_kwargs (Optional[Dict[str, Any]]): Optional overrides for retry behavior.
+            **request_kwargs: Any additional options forwarded to `httpx.Client.request` (e.g., `verify`, `timeout`, `follow_redirects`).
+
             Note: Proxies are applied at client construction via `proxy` or per-scheme `mounts`, and `trust_env`.
             To change them, re‑instantiate the connector.
 
@@ -190,6 +212,7 @@ class Broker:
                 params=params,
                 json=json,
                 auth=auth,
+                **request_kwargs,
             )
             response.raise_for_status()
             return response
