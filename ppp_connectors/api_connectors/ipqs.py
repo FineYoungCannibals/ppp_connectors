@@ -1,15 +1,8 @@
-"""
-IPQS Connector
-
-This module provides a connector for IPQualityScore's Malicious URL Scanner API.
-The connector uses the shared Broker base class for HTTP operations, logging,
-and environment variable loading.
-"""
 from typing import Optional, Dict, Any
 from urllib.parse import quote
-from ppp_connectors.api_connectors.broker import Broker, log_method_call
+from ppp_connectors.api_connectors.broker import Broker, bubble_broker_init_signature, log_method_call
 
-
+@bubble_broker_init_signature()
 class IPQSConnector(Broker):
     """
     A connector for the IPQualityScore Malicious URL Scanner API.

@@ -1,13 +1,7 @@
 from typing import Dict, Any, Optional
-from ppp_connectors.api_connectors.broker import Broker
+from ppp_connectors.api_connectors.broker import Broker, bubble_broker_init_signature, log_method_call
 
-"""
-URLScan Connector
-
-This module provides a typed connector for the urlscan.io API, built on the Broker class.
-It supports searching, scanning, and retrieving structured results for analyzed URLs.
-"""
-
+@bubble_broker_init_signature()
 class URLScanConnector(Broker):
     """
     A connector for interacting with the urlscan.io API.
@@ -30,6 +24,7 @@ class URLScanConnector(Broker):
             "API-Key": self.api_key
         })
 
+    @log_method_call
     def search(self, query: str, **kwargs: Dict[str, Any]) -> Dict[str, Any]:
         """
         Search for archived scans matching a given query.
@@ -44,6 +39,7 @@ class URLScanConnector(Broker):
         params = {"q": query, **kwargs}
         return self.get("/search/", params=params).json()
 
+    @log_method_call
     def scan(self, query: str, **kwargs: Dict[str, Any]) -> Dict[str, Any]:
         """
         Submit a URL to be scanned by urlscan.io.
@@ -58,6 +54,7 @@ class URLScanConnector(Broker):
         payload = {"url": query, **kwargs}
         return self.post("/scan", json=payload).json()
 
+    @log_method_call
     def results(self, uuid: str, **kwargs: Dict[str, Any]) -> Dict[str, Any]:
         """
         Retrieve detailed scan results by UUID.
@@ -70,6 +67,7 @@ class URLScanConnector(Broker):
         """
         return self.get(f"/result/{uuid}", params=kwargs).json()
 
+    @log_method_call
     def get_dom(self, uuid: str, **kwargs: Dict[str, Any]) -> Dict[str, Any]:
         """
         Retrieve the DOM snapshot for a given scan UUID.
@@ -82,6 +80,7 @@ class URLScanConnector(Broker):
         """
         return self.get(f"https://urlscan.io/dom/{uuid}", params=kwargs).json()
 
+    @log_method_call
     def structure_search(self, uuid: str, **kwargs: Dict[str, Any]) -> Dict[str, Any]:
         """
         Search for scans structurally similar to a given UUID.

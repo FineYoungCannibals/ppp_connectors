@@ -1,9 +1,10 @@
 from datetime import date, datetime
 from typing import Dict, Any, List, Set, Union, Optional
 from httpx import BasicAuth
-from ppp_connectors.api_connectors.broker import Broker
+from ppp_connectors.api_connectors.broker import Broker, bubble_broker_init_signature, log_method_call
 from ppp_connectors.helpers import validate_date_string
 
+@bubble_broker_init_signature()
 class TwilioConnector(Broker):
     """
     Connector for interacting with Twilio Lookup and Usage APIs.
@@ -27,6 +28,7 @@ class TwilioConnector(Broker):
 
         self.auth = BasicAuth(self.api_sid, self.api_secret)
 
+    @log_method_call
     def lookup_phone(self, phone_number: str, data_packages: Optional[List[str]] = None, **kwargs) -> Dict[str, Any]:
         """
         Query information about a phone number using Twilio's Lookup API.
