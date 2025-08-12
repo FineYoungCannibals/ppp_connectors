@@ -1,3 +1,4 @@
+import httpx
 import pytest
 from unittest.mock import patch, MagicMock
 from ppp_connectors.api_connectors.urlscan import URLScanConnector
@@ -18,10 +19,21 @@ def test_init_missing_auth_keys(mock_env):
 
 @patch("ppp_connectors.api_connectors.urlscan.URLScanConnector.get")
 def test_results(mock_get):
-    mock_response = MagicMock()
-    mock_response.json.return_value = {"task": "test"}
+    import json
+
+    # Build a real httpx.Response to match the new return type
+    request = httpx.Request("GET", "https://urlscan.io/api/v1/result/abc123")
+    payload = {"task": "test"}
+    mock_response = httpx.Response(
+        200,
+        request=request,
+        content=json.dumps(payload).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+    )
     mock_get.return_value = mock_response
 
     connector = URLScanConnector(api_key="test_key")
     result = connector.results("abc123")
-    assert result == {"task": "test"}
+
+    assert isinstance(result, httpx.Response)
+    assert result.json() == payload

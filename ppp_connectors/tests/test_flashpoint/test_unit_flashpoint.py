@@ -1,6 +1,4 @@
-
-
-
+import httpx
 import pytest
 from unittest.mock import patch, MagicMock
 from ppp_connectors.api_connectors.flashpoint import FlashpointConnector
@@ -26,12 +24,22 @@ def test_init_missing_key():
 
 @patch("ppp_connectors.api_connectors.flashpoint.FlashpointConnector.post")
 def test_search_fraud(mock_post):
-    mock_response = MagicMock()
-    mock_response.json.return_value = {"success": True, "data": []}
+    import json
+
+    # Use a real httpx.Response so our test matches the new return type
+    request = httpx.Request("POST", "https://api.flashpoint.io/mock")
+    payload = {"success": True, "data": []}
+    mock_response = httpx.Response(
+        200,
+        request=request,
+        content=json.dumps(payload).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+    )
     mock_post.return_value = mock_response
 
     connector = FlashpointConnector(api_key="mock_token")
     result = connector.search_fraud("credential stuffing")
 
-    assert result == {"success": True, "data": []}
+    assert isinstance(result, httpx.Response)
+    assert result.json() == payload
     mock_post.assert_called_once()

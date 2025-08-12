@@ -1,3 +1,5 @@
+import json
+import httpx
 import pytest
 from unittest.mock import patch, MagicMock
 from ppp_connectors.api_connectors.spycloud import SpycloudConnector
@@ -25,12 +27,20 @@ def test_init_missing_key(mock_env):
 
 @patch("ppp_connectors.api_connectors.spycloud.SpycloudConnector._make_request")
 def test_ato_search(mock_request):
-    mock_response = MagicMock()
-    mock_response.json.return_value = {"results": []}
+    # Build a real httpx.Response to match new return type (raw Response)
+    request = httpx.Request("GET", "https://api.spycloud.io/sp-v2/breach/data/emails/test@example.com")
+    payload = {"results": []}
+    mock_response = httpx.Response(
+        200,
+        request=request,
+        content=json.dumps(payload).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+    )
     mock_request.return_value = mock_response
 
     connector = SpycloudConnector(ato_key="test_key")
     result = connector.ato_search(search_type="ip", query="test@example.com")
 
     mock_request.assert_called_once()
-    assert result == {"results": []}
+    assert isinstance(result, httpx.Response)
+    assert result.json() == payload
