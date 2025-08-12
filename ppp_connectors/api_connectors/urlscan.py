@@ -1,13 +1,8 @@
+import httpx
 from typing import Dict, Any, Optional
-from ppp_connectors.api_connectors.broker import Broker
+from ppp_connectors.api_connectors.broker import Broker, bubble_broker_init_signature, log_method_call
 
-"""
-URLScan Connector
-
-This module provides a typed connector for the urlscan.io API, built on the Broker class.
-It supports searching, scanning, and retrieving structured results for analyzed URLs.
-"""
-
+@bubble_broker_init_signature()
 class URLScanConnector(Broker):
     """
     A connector for interacting with the urlscan.io API.
@@ -30,7 +25,8 @@ class URLScanConnector(Broker):
             "API-Key": self.api_key
         })
 
-    def search(self, query: str, **kwargs: Dict[str, Any]) -> Dict[str, Any]:
+    @log_method_call
+    def search(self, query: str, **kwargs: Dict[str, Any]) -> httpx.Response:
         """
         Search for archived scans matching a given query.
 
@@ -39,12 +35,13 @@ class URLScanConnector(Broker):
             **kwargs: Additional query parameters for filtering results.
 
         Returns:
-            dict: JSON response with matching scan metadata.
+            httpx.Response: the httpx.Response object
         """
         params = {"q": query, **kwargs}
-        return self.get("/search/", params=params).json()
+        return self.get("/search/", params=params)
 
-    def scan(self, query: str, **kwargs: Dict[str, Any]) -> Dict[str, Any]:
+    @log_method_call
+    def scan(self, query: str, **kwargs: Dict[str, Any]) -> httpx.Response:
         """
         Submit a URL to be scanned by urlscan.io.
 
@@ -53,12 +50,13 @@ class URLScanConnector(Broker):
             **kwargs: Additional scan options like tags, visibility, or referer.
 
         Returns:
-            dict: JSON response containing the scan ID and status.
+            httpx.Response: the httpx.Response object
         """
         payload = {"url": query, **kwargs}
-        return self.post("/scan", json=payload).json()
+        return self.post("/scan", json=payload)
 
-    def results(self, uuid: str, **kwargs: Dict[str, Any]) -> Dict[str, Any]:
+    @log_method_call
+    def results(self, uuid: str, **kwargs: Dict[str, Any]) -> httpx.Response:
         """
         Retrieve detailed scan results by UUID.
 
@@ -66,11 +64,12 @@ class URLScanConnector(Broker):
             uuid (str): The UUID of the scan.
 
         Returns:
-            dict: JSON response with scan results and metadata.
+            httpx.Response: the httpx.Response object
         """
-        return self.get(f"/result/{uuid}", params=kwargs).json()
+        return self.get(f"/result/{uuid}", params=kwargs)
 
-    def get_dom(self, uuid: str, **kwargs: Dict[str, Any]) -> Dict[str, Any]:
+    @log_method_call
+    def get_dom(self, uuid: str, **kwargs: Dict[str, Any]) -> httpx.Response:
         """
         Retrieve the DOM snapshot for a given scan UUID.
 
@@ -78,11 +77,12 @@ class URLScanConnector(Broker):
             uuid (str): The UUID of the scan.
 
         Returns:
-            dict: JSON response with the scanned DOM content.
+            httpx.Response: the httpx.Response object
         """
-        return self.get(f"https://urlscan.io/dom/{uuid}", params=kwargs).json()
+        return self.get(f"https://urlscan.io/dom/{uuid}", params=kwargs)
 
-    def structure_search(self, uuid: str, **kwargs: Dict[str, Any]) -> Dict[str, Any]:
+    @log_method_call
+    def structure_search(self, uuid: str, **kwargs: Dict[str, Any]) -> httpx.Response:
         """
         Search for scans structurally similar to a given UUID.
 
@@ -90,6 +90,6 @@ class URLScanConnector(Broker):
             uuid (str): The UUID of the original scan.
 
         Returns:
-            dict: JSON response with similar scan entries.
+            httpx.Response: the httpx.Response object
         """
-        return self.get(f"/pro/result/{uuid}/similar", params=kwargs).json()
+        return self.get(f"/pro/result/{uuid}/similar", params=kwargs)

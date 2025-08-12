@@ -1,13 +1,15 @@
-from typing import Dict, Any, Optional
-from ppp_connectors.api_connectors.broker import Broker
 import httpx
+from typing import Dict, Any, Optional
+from ppp_connectors.api_connectors.broker import Broker, bubble_broker_init_signature, log_method_call
 
+@bubble_broker_init_signature()
 class GenericConnector(Broker):
     """
     A flexible, minimal connector that allows sending arbitrary HTTP requests
     using the Broker infrastructure.
     """
 
+    @log_method_call
     def request(
         self,
         method: str,

@@ -1,3 +1,4 @@
+import httpx
 import pytest
 from unittest.mock import patch, MagicMock
 from ppp_connectors.api_connectors.ipqs import IPQSConnector
@@ -23,13 +24,22 @@ def test_init_missing_key():
 
 @patch("ppp_connectors.api_connectors.ipqs.IPQSConnector.post")
 def test_malicious_url(mock_post):
-    # Mock a response
-    mock_response = MagicMock()
-    mock_response.json.return_value = {"success": True, "domain": "example.com"}
+    # Build a real httpx.Response to match the new return type
+    import json
+
+    request = httpx.Request("POST", "https://ipqualityscore.com/api/json/url/")
+    payload = {"success": True, "domain": "example.com"}
+    mock_response = httpx.Response(
+        200,
+        request=request,
+        content=json.dumps(payload).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+    )
     mock_post.return_value = mock_response
 
     connector = IPQSConnector(api_key="test_key")
     result = connector.malicious_url("example.com")
 
     mock_post.assert_called_once()
-    assert result == {"success": True, "domain": "example.com"}
+    assert isinstance(result, httpx.Response)
+    assert result.json() == payload

@@ -1,6 +1,6 @@
 import httpx
 from httpx import Auth
-from typing import Optional, Dict, Any, Union
+from typing import Optional, Dict, Any, Union, Iterable, Callable, ParamSpec, TypeVar
 from tenacity import retry, stop_after_attempt, wait_exponential, RetryError
 from ppp_connectors.helpers import setup_logger, combine_env_configs
 from functools import wraps
@@ -8,7 +8,10 @@ import inspect
 import os
 
 
-def log_method_call(func):
+P = ParamSpec("P")
+R = TypeVar("R")
+
+def log_method_call(func: Callable[P, R]) -> Callable[P, R]:
     @wraps(func)
     def wrapper(self, *args, **kwargs):
         caller = func.__name__
@@ -19,6 +22,71 @@ def log_method_call(func):
         self._log(f"{caller} called with query: {query_value}")
         return func(self, *args, **kwargs)
     return wrapper
+
+
+def bubble_broker_init_signature(*, exclude: Iterable[str] = ("base_url",)):
+    """
+    Class decorator that augments a connector subclass' __init__ signature with
+    parameters from Broker.__init__ for better IDE/tab-completion hints.
+
+    Usage:
+        from ppp_connectors.api_connectors.broker import Broker, bubble_broker_init_signature
+
+        @bubble_broker_init_signature()
+        class MyConnector(Broker):
+            def __init__(self, api_key: str | None = None, **kwargs):
+                super().__init__(base_url="https://example.com", **kwargs)
+                ...
+
+    Notes:
+        - This affects *introspection only* (via __signature__). Runtime behavior is unchanged.
+        - Subclass-specific parameters remain first (e.g., api_key), followed by Broker params.
+        - `base_url` is excluded by default since subclasses set it themselves.
+        - The subclass' **kwargs (if present) is preserved at the end so httpx.Client kwargs
+          can still be passed through.
+    """
+    def _decorate(cls):
+        sub_init = cls.__init__
+        broker_init = Broker.__init__
+
+        sub_sig = inspect.signature(sub_init)
+        broker_sig = inspect.signature(broker_init)
+
+        new_params = []
+        saw_var_kw = None
+
+        # Keep subclass params first; remember its **kwargs if present
+        for p in sub_sig.parameters.values():
+            if p.kind is inspect.Parameter.VAR_KEYWORD:
+                saw_var_kw = p
+            else:
+                new_params.append(p)
+
+        present = {p.name for p in new_params}
+
+        # Append Broker params (skip self, excluded, already-present, and **kwargs)
+        for name, p in list(broker_sig.parameters.items())[1:]:
+            if name in exclude or name in present:
+                continue
+            if p.kind is inspect.Parameter.VAR_KEYWORD:
+                continue
+            new_params.append(p)
+
+        # Re-append subclass **kwargs (or add a generic one to keep flexibility)
+        if saw_var_kw is not None:
+            new_params.append(saw_var_kw)
+        else:
+            new_params.append(
+                inspect.Parameter(
+                    "client_kwargs",
+                    kind=inspect.Parameter.VAR_KEYWORD,
+                )
+            )
+
+        cls.__init__.__signature__ = inspect.Signature(parameters=new_params)
+        return cls
+
+    return _decorate
 
 class Broker:
     """
@@ -223,7 +291,7 @@ class Broker:
             self._log(f"HTTP error: {he}")
             raise
 
-    def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None, **kwargs):
+    def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None, **kwargs) -> httpx.Response:
         """
         Convenience method for HTTP GET requests.
 
@@ -236,7 +304,7 @@ class Broker:
         """
         return self._make_request("GET", endpoint, params=params, **kwargs)
 
-    def post(self, endpoint: str, json: Optional[Dict[str, Any]] = None, **kwargs):
+    def post(self, endpoint: str, json: Optional[Dict[str, Any]] = None, **kwargs) -> httpx.Response:
         """
         Convenience method for HTTP POST requests.
 

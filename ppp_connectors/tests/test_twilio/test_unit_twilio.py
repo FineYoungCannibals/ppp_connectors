@@ -1,3 +1,4 @@
+import httpx
 import pytest
 from unittest.mock import patch, MagicMock
 from ppp_connectors.api_connectors.twilio import TwilioConnector
@@ -24,12 +25,21 @@ def test_init_missing_auth_keys(mock_env):
 
 @patch("ppp_connectors.api_connectors.twilio.TwilioConnector._make_request")
 def test_lookup_phone(mock_request):
-    mock_resp = MagicMock()
-    mock_resp.json.return_value = {"carrier": "example"}
-    mock_request.return_value = mock_resp
+    import json
+    # Return a real httpx.Response to reflect new return type
+    req = httpx.Request("GET", "https://lookups.twilio.com/v2/PhoneNumbers/15555555555")
+    payload = {"carrier": "example"}
+    resp = httpx.Response(
+        200,
+        request=req,
+        content=json.dumps(payload).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+    )
+    mock_request.return_value = resp
 
     connector = TwilioConnector(api_sid="sid", api_secret="secret")
-    result = connector.lookup_phone("+15555555555")
+    result = connector.lookup_phone("15555555555")
 
-    assert "carrier" in result
+    assert isinstance(result, httpx.Response)
+    assert result.json() == payload
     mock_request.assert_called_once()

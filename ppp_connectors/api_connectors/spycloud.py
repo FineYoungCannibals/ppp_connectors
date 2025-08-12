@@ -1,7 +1,9 @@
+import httpx
 from typing import Dict, Any, Optional
-from ppp_connectors.api_connectors.broker import Broker
-import sys
+from ppp_connectors.api_connectors.broker import Broker, bubble_broker_init_signature, log_method_call
 
+
+@bubble_broker_init_signature()
 class SpycloudConnector(Broker):
     """
     SpyCloudConnector provides typed methods to interact with various SpyCloud APIs, including:
@@ -18,7 +20,8 @@ class SpycloudConnector(Broker):
         self.ato_key = ato_key or self.env_config.get("SPYCLOUD_API_ATO_KEY")
         self.inv_key = inv_key or self.env_config.get("SPYCLOUD_API_INV_KEY")
 
-    def sip_cookie_domains(self, cookie_domains: str, **kwargs) -> Dict[str, Any]:
+    @log_method_call
+    def sip_cookie_domains(self, cookie_domains: str, **kwargs) -> httpx.Response:
         """Query SIP cookie domain data."""
         if not self.sip_key:
             raise ValueError("SPYCLOUD_API_SIP_KEY is required for this request.")
@@ -27,9 +30,10 @@ class SpycloudConnector(Broker):
             "accept": "application/json",
             "x-api-key": self.sip_key
         }
-        return self._make_request("get", endpoint=endpoint, headers=headers, params=kwargs).json()
+        return self._make_request("get", endpoint=endpoint, headers=headers, params=kwargs)
 
-    def ato_breach_catalog(self, query: str, **kwargs) -> Dict[str, Any]:
+    @log_method_call
+    def ato_breach_catalog(self, query: str, **kwargs) -> httpx.Response:
         """Query ATO breach catalog."""
         if not self.ato_key:
             raise ValueError("SPYCLOUD_API_ATO_KEY is required for this request.")
@@ -39,9 +43,10 @@ class SpycloudConnector(Broker):
             "x-api-key": self.ato_key
         }
         params = {"query": query, **kwargs}
-        return self._make_request("get", endpoint=endpoint, headers=headers, params=params).json()
+        return self._make_request("get", endpoint=endpoint, headers=headers, params=params)
 
-    def ato_search(self, search_type: str, query: str, **kwargs) -> Dict[str, Any]:
+    @log_method_call
+    def ato_search(self, search_type: str, query: str, **kwargs) -> httpx.Response:
         """Search against SpyCloud's ATO breach dataset."""
         if not self.ato_key:
             raise ValueError("SPYCLOUD_API_ATO_KEY is required for this request.")
@@ -63,9 +68,10 @@ class SpycloudConnector(Broker):
             "accept": "application/json",
             "x-api-key": self.ato_key
         }
-        return self._make_request("get", endpoint=endpoint, headers=headers, params=kwargs).json()
+        return self._make_request("get", endpoint=endpoint, headers=headers, params=kwargs)
 
-    def investigations_search(self, search_type: str, query: str, **kwargs) -> Dict[str, Any]:
+    @log_method_call
+    def investigations_search(self, search_type: str, query: str, **kwargs) -> httpx.Response:
         """Search SpyCloud Investigations API by type and query."""
         if not self.inv_key:
             raise ValueError("SPYCLOUD_API_INV_KEY is required for this request.")
@@ -98,4 +104,4 @@ class SpycloudConnector(Broker):
             "accept": "application/json",
             "x-api-key": self.inv_key
         }
-        return self._make_request("get", endpoint=endpoint, headers=headers, params=kwargs).json()
+        return self._make_request("get", endpoint=endpoint, headers=headers, params=kwargs)

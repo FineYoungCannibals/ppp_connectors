@@ -1,6 +1,8 @@
+import httpx
 from typing import Dict, Any, Optional
-from ppp_connectors.api_connectors.broker import Broker
+from ppp_connectors.api_connectors.broker import Broker, bubble_broker_init_signature, log_method_call
 
+@bubble_broker_init_signature()
 class FlashpointConnector(Broker):
     """
     FlashpointConnector provides access to various Flashpoint API search and retrieval endpoints
@@ -20,26 +22,32 @@ class FlashpointConnector(Broker):
             "Authorization": f"Bearer {self.api_key}",
         })
 
-    def search_communities(self, query: str, **kwargs) -> Dict[str, Any]:
+    @log_method_call
+    def search_communities(self, query: str, **kwargs) -> httpx.Response:
         """Search Flashpoint communities data."""
-        return self.post("/sources/v2/communities", json={"query": query, **kwargs}).json()
+        return self.post("/sources/v2/communities", json={"query": query, **kwargs})
 
-    def search_fraud(self, query: str, **kwargs) -> Dict[str, Any]:
+    @log_method_call
+    def search_fraud(self, query: str, **kwargs) -> httpx.Response:
         """Search Flashpoint fraud datasets."""
-        return self.post("/sources/v2/fraud", json={"query": query, **kwargs}).json()
+        return self.post("/sources/v2/fraud", json={"query": query, **kwargs})
 
-    def search_marketplaces(self, query: str, **kwargs) -> Dict[str, Any]:
+    @log_method_call
+    def search_marketplaces(self, query: str, **kwargs) -> httpx.Response:
         """Search Flashpoint marketplace datasets."""
-        return self.post("/sources/v2/markets", json={"query": query, **kwargs}).json()
+        return self.post("/sources/v2/markets", json={"query": query, **kwargs})
 
-    def search_media(self, query: str, **kwargs) -> Dict[str, Any]:
+    @log_method_call
+    def search_media(self, query: str, **kwargs) -> httpx.Response:
         """Search OCR-processed media from Flashpoint."""
-        return self.post("/sources/v2/media", json={"query": query, **kwargs}).json()
+        return self.post("/sources/v2/media", json={"query": query, **kwargs})
 
-    def get_media_object(self, media_id: str) -> Dict[str, Any]:
+    @log_method_call
+    def get_media_object(self, media_id: str) -> httpx.Response:
         """Retrieve metadata for a specific media object."""
-        return self.get(f"/sources/v2/media/{media_id}").json()
+        return self.get(f"/sources/v2/media/{media_id}")
 
-    def get_media_image(self, storage_uri: str) -> Dict[str, Any]:
+    @log_method_call
+    def get_media_image(self, storage_uri: str) -> httpx.Response:
         """Download image asset by storage_uri."""
-        return self.get("/sources/v1/media/", params={"asset_id": storage_uri}).json()
+        return self.get("/sources/v1/media/", params={"asset_id": storage_uri})

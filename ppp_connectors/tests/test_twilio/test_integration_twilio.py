@@ -1,5 +1,5 @@
 
-
+import httpx
 import pytest
 import vcr
 from ppp_connectors.api_connectors.twilio import TwilioConnector
@@ -10,5 +10,5 @@ def test_lookup_phone_vcr(vcr_cassette):
         connector = TwilioConnector(load_env_vars=True)
         result = connector.lookup_phone("+14155552671")
 
-        assert isinstance(result, dict)
-        assert "phone_number" in result or "caller_name" in result or "line_type" in result
+        assert isinstance(result, httpx.Response)
+        assert "phone_number" in result.json() or "caller_name" in result.json() or "line_type" in result.json()

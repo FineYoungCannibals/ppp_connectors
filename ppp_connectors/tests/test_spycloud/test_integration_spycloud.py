@@ -1,7 +1,5 @@
-
-
+import httpx
 import pytest
-import vcr
 from ppp_connectors.api_connectors.spycloud import SpycloudConnector
 
 @pytest.mark.integration
@@ -10,5 +8,5 @@ def test_spycloud_ato_search_vcr(vcr_cassette):
         connector = SpycloudConnector(load_env_vars=True, enable_logging=True)
         result = connector.ato_search(search_type="ip", query="8.8.8.8")
 
-        assert isinstance(result, dict)
-        assert "results" in result
+        assert isinstance(result, httpx.Response)
+        assert "results" in result.json()
