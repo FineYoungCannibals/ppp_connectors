@@ -1,6 +1,6 @@
 import httpx
 from httpx import Auth
-from typing import Optional, Dict, Any, Union, Iterable
+from typing import Optional, Dict, Any, Union, Iterable, Callable, ParamSpec, TypeVar
 from tenacity import retry, stop_after_attempt, wait_exponential, RetryError
 from ppp_connectors.helpers import setup_logger, combine_env_configs
 from functools import wraps
@@ -8,7 +8,10 @@ import inspect
 import os
 
 
-def log_method_call(func):
+P = ParamSpec("P")
+R = TypeVar("R")
+
+def log_method_call(func: Callable[P, R]) -> Callable[P, R]:
     @wraps(func)
     def wrapper(self, *args, **kwargs):
         caller = func.__name__
@@ -288,7 +291,7 @@ class Broker:
             self._log(f"HTTP error: {he}")
             raise
 
-    def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None, **kwargs):
+    def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None, **kwargs) -> httpx.Response:
         """
         Convenience method for HTTP GET requests.
 
@@ -301,7 +304,7 @@ class Broker:
         """
         return self._make_request("GET", endpoint, params=params, **kwargs)
 
-    def post(self, endpoint: str, json: Optional[Dict[str, Any]] = None, **kwargs):
+    def post(self, endpoint: str, json: Optional[Dict[str, Any]] = None, **kwargs) -> httpx.Response:
         """
         Convenience method for HTTP POST requests.
 

@@ -1,6 +1,6 @@
 from datetime import date, datetime
 from typing import Dict, Any, List, Set, Union, Optional
-from httpx import BasicAuth
+from httpx import BasicAuth, Response
 from ppp_connectors.api_connectors.broker import Broker, bubble_broker_init_signature, log_method_call
 from ppp_connectors.helpers import validate_date_string
 
@@ -29,7 +29,7 @@ class TwilioConnector(Broker):
         self.auth = BasicAuth(self.api_sid, self.api_secret)
 
     @log_method_call
-    def lookup_phone(self, phone_number: str, data_packages: Optional[List[str]] = None, **kwargs) -> Dict[str, Any]:
+    def lookup_phone(self, phone_number: str, data_packages: Optional[List[str]] = None, **kwargs) -> Response:
         """
         Query information about a phone number using Twilio's Lookup API.
 
@@ -38,7 +38,7 @@ class TwilioConnector(Broker):
             data_packages (list): Optional data packages to include (e.g. 'caller_name', 'sim_swap').
 
         Returns:
-            dict: JSON response from Twilio.
+            httpx.Response: the httpx.Response object
         """
         valid_data_packages: Set[str] = {
             'caller_name', 'sim_swap', 'call_forwarding', 'line_status',
@@ -57,4 +57,4 @@ class TwilioConnector(Broker):
         }
 
         endpoint = f"/PhoneNumbers/{phone_number}"
-        return self._make_request("get", endpoint=endpoint, auth=self.auth, params=params).json()
+        return self._make_request("get", endpoint=endpoint, auth=self.auth, params=params)

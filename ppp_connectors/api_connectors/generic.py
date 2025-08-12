@@ -1,6 +1,6 @@
+import httpx
 from typing import Dict, Any, Optional
 from ppp_connectors.api_connectors.broker import Broker, bubble_broker_init_signature, log_method_call
-import httpx
 
 @bubble_broker_init_signature()
 class GenericConnector(Broker):
