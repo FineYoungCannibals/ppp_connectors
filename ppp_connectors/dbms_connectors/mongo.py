@@ -1,4 +1,4 @@
-from pymongo import MongoClient
+from pymongo import MongoClient, UpdateOne
 from typing import List, Dict, Any, Optional, Generator
 from ppp_connectors.helpers import setup_logger
 
@@ -107,23 +107,47 @@ class MongoConnector:
         db_name: str,
         collection: str,
         data: List[Dict],
-        ordered: bool = False
+        ordered: bool = False,
+        batch_size: int = 1000,
+        upsert: bool = False,
+        unique_key: Optional[str] = None
     ):
         """
-        Perform a bulk insert operation into a MongoDB collection.
+        Perform a bulk insert or upsert operation into a MongoDB collection.
 
         Args:
             db_name (str): Name of the database.
             collection (str): Name of the collection.
             data (List[Dict]): List of documents to insert.
             ordered (bool): Whether the insert operations should be ordered. Defaults to False.
+            batch_size (int): Number of documents per batch. Defaults to 1000.
+            upsert (bool): If True, perform upserts instead of inserts. Requires unique_key.
+            unique_key (Optional[str]): Field to use for upsert filtering. Required if upsert is True.
 
         Returns:
-            InsertManyResult: The result of the bulk insert operation.
+            List: List of InsertManyResult or BulkWriteResult objects for each batch.
 
         Logs:
-            Logs the number of documents being inserted.
+            Logs the number of documents being inserted, the batch size, and the upsert flag.
         """
-        self._log(f"Inserting {len(data)} documents into {db_name}.{collection}")
+        if upsert and not unique_key:
+            raise ValueError("unique_key must be provided when upsert is True")
+        self._log(f"Inserting {len(data)} documents into {db_name}.{collection} with batch_size={batch_size}, upsert={upsert}")
         col = self.client[db_name][collection]
-        return col.insert_many(data, ordered=ordered)
+        results = []
+
+        for i in range(0, len(data), batch_size):
+            batch = data[i:i + batch_size]
+            if upsert and unique_key:
+                operations = [
+                    UpdateOne({unique_key: doc[unique_key]}, {"$set": doc}, upsert=True)
+                    for doc in batch if unique_key in doc
+                ]
+                if operations:
+                    result = col.bulk_write(operations, ordered=ordered)
+                    results.append(result)
+            else:
+                result = col.insert_many(batch, ordered=ordered)
+                results.append(result)
+
+        return results

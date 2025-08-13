@@ -84,3 +84,44 @@ def test_mongo_init_with_auth_and_ssl(mock_mongo_client):
 def test_mongo_init_defaults(mock_mongo_client):
     MongoConnector(uri="mongodb://localhost:27017")
     mock_mongo_client.assert_called_once()
+
+
+from pymongo import UpdateOne
+
+def test_bulk_upsert_with_unique_key(monkeypatch):
+    mock_bulk_write = MagicMock()
+    mock_collection = MagicMock()
+    mock_collection.bulk_write = mock_bulk_write
+
+    connector = MongoConnector(
+        uri="mongodb://localhost:27017",
+        username="fake",
+        password="fake"
+    )
+    connector.client = MagicMock()
+    connector.client.__getitem__.return_value.__getitem__.return_value = mock_collection
+
+    data = [{"_id": 1, "value": "A"}, {"_id": 2, "value": "B"}]
+    connector.bulk_insert("test_db", "test_collection", data, upsert=True, unique_key="_id")
+
+    ops = [
+        UpdateOne({"_id": 1}, {"$set": {"_id": 1, "value": "A"}}, upsert=True),
+        UpdateOne({"_id": 2}, {"$set": {"_id": 2, "value": "B"}}, upsert=True)
+    ]
+    mock_bulk_write.assert_called_once_with(ops, ordered=False)
+
+
+def test_bulk_upsert_raises_without_unique_key(monkeypatch):
+    connector = MongoConnector(
+        uri="mongodb://localhost:27017",
+        username="fake",
+        password="fake"
+    )
+    mock_collection = MagicMock()
+    mock_collection.bulk_write = MagicMock()
+    connector.client = MagicMock()
+    connector.client.__getitem__.return_value.__getitem__.return_value = mock_collection
+
+    data = [{"_id": i} for i in range(2501)]
+    with pytest.raises(ValueError, match="unique_key must be provided when upsert is True"):
+        connector.bulk_insert("test_db", "test_collection", data, upsert=True)
