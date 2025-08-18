@@ -2,6 +2,7 @@ import httpx
 from httpx import Auth
 from typing import Optional, Dict, Any, Union, Iterable, Callable, ParamSpec, TypeVar
 from tenacity import retry, stop_after_attempt, wait_exponential, RetryError
+from tenacity import retry_if_exception
 from ppp_connectors.helpers import setup_logger, combine_env_configs
 from functools import wraps
 import inspect
@@ -248,7 +249,9 @@ class Broker:
             params (Optional[Dict[str, Any]]): Query parameters for the request.
             json (Optional[Dict[str, Any]]): JSON body for the request.
             auth (Optional[tuple]): Optional basic auth tuple (username, password).
-            retry_kwargs (Optional[Dict[str, Any]]): Optional overrides for retry behavior.
+            retry_kwargs (Optional[Dict[str, Any]]): Optional overrides for retry behavior. May include
+                `stop`, `wait`, and `retry` (a tenacity predicate). By default, retries occur on 429 and 5xx
+                responses and on common transient transport errors.
             **request_kwargs: Any additional options forwarded to `httpx.Client.request` (e.g., `verify`, `timeout`, `follow_redirects`).
 
             Note: Proxies are applied at client construction via `proxy` or per-scheme `mounts`, and `trust_env`.
@@ -262,18 +265,11 @@ class Broker:
             httpx.HTTPStatusError: If the response status code indicates an error.
         """
         url = f"{self.base_url}/{endpoint.lstrip('/')}"
-        request_fn = self.session.request
 
-        if self.enable_backoff:
-            request_fn = retry(
-                stop=stop_after_attempt(3),
-                wait=wait_exponential(multiplier=1, min=2, max=10),
-                reraise=True,
-                **(retry_kwargs or {}),
-            )(request_fn)
-
-        try:
-            response = request_fn(
+        # Define a callable that performs the request *and* raises for status,
+        # so the retry wrapper can catch httpx.HTTPStatusError (e.g., 429/5xx).
+        def do_request() -> httpx.Response:
+            resp = self.session.request(
                 method=method,
                 url=url,
                 headers=headers or self.headers,
@@ -282,10 +278,45 @@ class Broker:
                 auth=auth,
                 **request_kwargs,
             )
-            response.raise_for_status()
-            return response
+            # If non-2xx, this will raise httpx.HTTPStatusError.
+            resp.raise_for_status()
+            return resp
+
+        # Default retry condition: retry on rate limit (429), server errors (5xx),
+        # and transient transport errors.
+        def _default_retry_exc(exc: BaseException) -> bool:
+            if isinstance(exc, httpx.HTTPStatusError):
+                r = exc.response
+                if r is not None:
+                    return r.status_code == 429 or 500 <= r.status_code < 600
+            # Connection/timeout/type of transient httpx errors
+            return isinstance(exc, (
+                httpx.ConnectError,
+                httpx.ReadTimeout,
+                httpx.WriteError,
+                httpx.RemoteProtocolError,
+                httpx.PoolTimeout,
+            ))
+
+        call = do_request
+        if self.enable_backoff:
+            # Allow caller overrides via retry_kwargs; otherwise use sensible defaults.
+            rk = dict(retry_kwargs or {})
+            # If no explicit retry predicate provided, supply ours.
+            if "retry" not in rk:
+                rk["retry"] = retry_if_exception(_default_retry_exc)
+            if "stop" not in rk:
+                rk["stop"] = stop_after_attempt(3)
+            if "wait" not in rk:
+                rk["wait"] = wait_exponential(multiplier=1, min=2, max=10)
+            call = retry(reraise=True, **rk)(do_request)
+
+        try:
+            return call()
         except RetryError as re:
-            self._log(f"Retry failed: {re.last_attempt.exception()}")
+            # Tenacity wraps the last exception; surface some context for logs.
+            last = re.last_attempt.exception()
+            self._log(f"Retry failed: {last}")
             raise
         except httpx.HTTPStatusError as he:
             self._log(f"HTTP error: {he}")
