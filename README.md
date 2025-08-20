@@ -8,6 +8,7 @@ A clean, modular set of Python connectors and utilities for working with both **
 
 - [Installation](#installation)
 - [API Connectors](#api-connectors)
+  - [Async Support](#async-support)
   - [Example (URLScan)](#example-urlscan)
   - [Customizing API Requests with **kwargs](#customizing-api-requests-with-kwargs)
 - [DBMS Connectors](#dbms-connectors)
@@ -46,26 +47,49 @@ Environment variables are loaded automatically via the `combine_env_configs()` h
 
 ## 🔌 API Connectors
 
+All API connectors inherit from a common `Broker` abstraction that comes in two flavors:
 
-All API connectors inherit from the shared `Broker` base class and:
-- Accept API credentials via env vars or constructor args
-- Send requests via `get`, `post`, etc.
-- Include support for logging, retry/backoff, and VCR integration
+- `Broker` for synchronous usage
+- `AsyncBroker` for asynchronous usage
 
-### Example (URLScan)
+Each API connector has both a sync and async version (e.g., `URLScanConnector` and `AsyncURLScanConnector`) with **identical method names** and consistent behavior.
 
-```python
+### 🧰 Shared Features
+
+- Accept API credentials via env vars or constructor args (`load_env_vars=True`)
+- Unified interface: `.get()`, `.post()`, etc.
+- Custom headers, query params, and body data via `**kwargs`
+- Logging, retry/backoff support
+- Proxy and SSL configuration
+- Optional VCR integration for tests
+
+> Choose the version based on your environment:
+> - Use `URLScanConnector` in CLI scripts and sync jobs
+> - Use `AsyncURLScanConnector` in FastAPI or async pipelines
+
+---
+
+### 🌐 Sync Example (URLScan)
+``` python
 from ppp_connectors.api_connectors.urlscan import URLScanConnector
 
 scanner = URLScanConnector(load_env_vars=True)
-result = scanner.scan(
-    url="https://example.com",
-    visibility="public",
-    tags=["example", "demo"],
-    custom={"foo": "bar"},  # Arbitrary API field passed via **kwargs
-    headers={"X-Custom-Header": "my-value"}  # httpx headers
-)
+result = scanner.scan(url="https://example.com")
 print(result.json())
+```
+---
+
+### ⚡ Async Example (URLScan)
+``` python
+import asyncio
+from ppp_connectors.api_connectors.urlscan import AsyncURLScanConnector
+
+async def main():
+   scanner = AsyncURLScanConnector(load_env_vars=True)
+   response = await scanner.scan(url="https://example.com")
+   print(await response.json())
+
+asyncio.run(main())
 ```
 
 ### Customizing API Requests with **kwargs
@@ -91,6 +115,7 @@ API connectors inherit from the `Broker` class and support flexible proxy config
 - a single `proxy` parameter (applies to all requests),
 - a per-scheme `mounts` parameter (e.g., separate proxies for `http` and `https` as a dictionary),
 - or environment variables (from `.env` or OS environment, specifically `HTTP_PROXY` and `HTTPS_PROXY`).
+> 🧠 **Note for async connectors:** Per-scheme `mounts` are not supported by `httpx.AsyncClient`. If you pass `mounts` to an async connector, it will raise a `ValueError`. Use the `proxy` argument or rely on environment variables (`load_env_vars=True`) instead.
 
 **Proxy precedence:**
 `mounts` > `proxy` > environment source (`.env` via `load_env_vars=True`, else OS environment if `trust_env=True`) > none.
@@ -221,6 +246,7 @@ results = conn.query("search index=_internal | head 5")
 
 - Located in `tests/<connector_name>/test_unit_<connector>.py`
 - Use mocking (`MagicMock`, `patch`) to avoid hitting external APIs
+- Async connectors use `pytest-asyncio` and require tests to be decorated with `@pytest.mark.asyncio`
 
 ### 🔁 Integration tests
 
@@ -308,6 +334,7 @@ Redacted fields include:
 ## ✅ Summary
 
 - Centralized request broker for all APIs
+- Full support for both sync and async API connectors with consistent method signatures
 - Robust DBMS connectors
 - Easy-to-write unit and integration tests with automatic redaction
 - Environment-agnostic configuration system

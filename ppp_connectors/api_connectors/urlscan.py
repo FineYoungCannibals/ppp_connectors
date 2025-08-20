@@ -1,6 +1,6 @@
 import httpx
 from typing import Dict, Any, Optional
-from ppp_connectors.api_connectors.broker import Broker, bubble_broker_init_signature, log_method_call
+from ppp_connectors.api_connectors.broker import AsyncBroker, Broker, bubble_broker_init_signature, log_method_call
 
 @bubble_broker_init_signature()
 class URLScanConnector(Broker):
@@ -93,3 +93,56 @@ class URLScanConnector(Broker):
             httpx.Response: the httpx.Response object
         """
         return self.get(f"/pro/result/{uuid}/similar", params=kwargs)
+
+class AsyncURLScanConnector(AsyncBroker):
+    """
+    An async connector for interacting with the urlscan.io API.
+    """
+
+    def __init__(self, api_key: Optional[str] = None, **kwargs):
+        super().__init__(base_url="https://urlscan.io/api/v1", **kwargs)
+
+        self.api_key = api_key or self.env_config.get("URLSCAN_API_KEY")
+        if not self.api_key:
+            raise ValueError("API key is required for AsyncURLScanConnector")
+        self.headers.update({
+            "accept": "application/json",
+            "API-Key": self.api_key
+        })
+
+    @log_method_call
+    async def search(self, query: str, **kwargs: Dict[str, Any]) -> httpx.Response:
+        """
+        Async search for archived scans matching a given query.
+        """
+        params = {"q": query, **kwargs}
+        return await self.get("/search/", params=params)
+
+    @log_method_call
+    async def scan(self, query: str, **kwargs: Dict[str, Any]) -> httpx.Response:
+        """
+        Async submit a URL to be scanned by urlscan.io.
+        """
+        payload = {"url": query, **kwargs}
+        return await self.post("/scan", json=payload)
+
+    @log_method_call
+    async def results(self, uuid: str, **kwargs: Dict[str, Any]) -> httpx.Response:
+        """
+        Async retrieve detailed scan results by UUID.
+        """
+        return await self.get(f"/result/{uuid}", params=kwargs)
+
+    @log_method_call
+    async def get_dom(self, uuid: str, **kwargs: Dict[str, Any]) -> httpx.Response:
+        """
+        Async retrieve the DOM snapshot for a given scan UUID.
+        """
+        return await self.get(f"https://urlscan.io/dom/{uuid}", params=kwargs)
+
+    @log_method_call
+    async def structure_search(self, uuid: str, **kwargs: Dict[str, Any]) -> httpx.Response:
+        """
+        Async search for scans structurally similar to a given UUID.
+        """
+        return await self.get(f"/pro/result/{uuid}/similar", params=kwargs)
