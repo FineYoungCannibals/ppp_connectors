@@ -1,6 +1,6 @@
 import httpx
-from typing import Dict, Any, Optional
-from ppp_connectors.api_connectors.broker import Broker, bubble_broker_init_signature, log_method_call
+from typing import Optional
+from ppp_connectors.api_connectors.broker import Broker, AsyncBroker, bubble_broker_init_signature, log_method_call
 
 @bubble_broker_init_signature()
 class FlashpointConnector(Broker):
@@ -51,3 +51,45 @@ class FlashpointConnector(Broker):
     def get_media_image(self, storage_uri: str) -> httpx.Response:
         """Download image asset by storage_uri."""
         return self.get("/sources/v1/media/", params={"asset_id": storage_uri})
+
+
+# Async version of FlashpointConnector
+@bubble_broker_init_signature()
+class AsyncFlashpointConnector(AsyncBroker):
+    """
+    AsyncFlashpointConnector provides async access to Flashpoint API endpoints.
+    """
+    def __init__(self, api_key: Optional[str] = None, **kwargs):
+        super().__init__(base_url="https://api.flashpoint.io", **kwargs)
+        self.api_key = api_key or self.env_config.get("FLASHPOINT_API_KEY")
+        if not self.api_key:
+            raise ValueError("FLASHPOINT_API_KEY is required")
+        self.headers.update({
+            "accept": "application/json",
+            "content-type": "application/json",
+            "Authorization": f"Bearer {self.api_key}",
+        })
+
+    @log_method_call
+    async def search_communities(self, query: str, **kwargs) -> httpx.Response:
+        return await self.post("/sources/v2/communities", json={"query": query, **kwargs})
+
+    @log_method_call
+    async def search_fraud(self, query: str, **kwargs) -> httpx.Response:
+        return await self.post("/sources/v2/fraud", json={"query": query, **kwargs})
+
+    @log_method_call
+    async def search_marketplaces(self, query: str, **kwargs) -> httpx.Response:
+        return await self.post("/sources/v2/markets", json={"query": query, **kwargs})
+
+    @log_method_call
+    async def search_media(self, query: str, **kwargs) -> httpx.Response:
+        return await self.post("/sources/v2/media", json={"query": query, **kwargs})
+
+    @log_method_call
+    async def get_media_object(self, media_id: str) -> httpx.Response:
+        return await self.get(f"/sources/v2/media/{media_id}")
+
+    @log_method_call
+    async def get_media_image(self, storage_uri: str) -> httpx.Response:
+        return await self.get("/sources/v1/media/", params={"asset_id": storage_uri})
