@@ -15,7 +15,7 @@ class URLScanConnector(Broker):
     """
 
     def __init__(self, api_key: Optional[str] = None, **kwargs):
-        super().__init__(base_url="https://urlscan.io/api/v1", **kwargs)
+        super().__init__(base_url="https://urlscan.io", **kwargs)
 
         self.api_key = api_key or self.env_config.get("URLSCAN_API_KEY")
         if not self.api_key:
@@ -38,7 +38,7 @@ class URLScanConnector(Broker):
             httpx.Response: the httpx.Response object
         """
         params = {"q": query, **kwargs}
-        return self.get("/search/", params=params)
+        return self.get("/api/v1/search/", params=params)
 
     @log_method_call
     def scan(self, query: str, **kwargs: Dict[str, Any]) -> httpx.Response:
@@ -53,46 +53,46 @@ class URLScanConnector(Broker):
             httpx.Response: the httpx.Response object
         """
         payload = {"url": query, **kwargs}
-        return self.post("/scan", json=payload)
+        return self.post("/api/v1/scan", json=payload)
 
     @log_method_call
-    def results(self, uuid: str, **kwargs: Dict[str, Any]) -> httpx.Response:
+    def results(self, query: str, **kwargs: Dict[str, Any]) -> httpx.Response:
         """
         Retrieve detailed scan results by UUID.
 
         Args:
-            uuid (str): The UUID of the scan.
+            query (str): The UUID of the scan.
 
         Returns:
             httpx.Response: the httpx.Response object
         """
-        return self.get(f"/result/{uuid}", params=kwargs)
+        return self.get(f"/api/v1/result/{query}", params=kwargs)
 
     @log_method_call
-    def get_dom(self, uuid: str, **kwargs: Dict[str, Any]) -> httpx.Response:
+    def get_dom(self, query: str, **kwargs: Dict[str, Any]) -> httpx.Response:
         """
         Retrieve the DOM snapshot for a given scan UUID.
 
         Args:
-            uuid (str): The UUID of the scan.
+            query (str): The UUID of the scan.
 
         Returns:
             httpx.Response: the httpx.Response object
         """
-        return self.get(f"https://urlscan.io/dom/{uuid}", params=kwargs)
+        return self.get(f"/dom/{query}", params=kwargs)
 
     @log_method_call
-    def structure_search(self, uuid: str, **kwargs: Dict[str, Any]) -> httpx.Response:
+    def structure_search(self, query: str, **kwargs: Dict[str, Any]) -> httpx.Response:
         """
         Search for scans structurally similar to a given UUID.
 
         Args:
-            uuid (str): The UUID of the original scan.
+            query (str): The UUID of the original scan.
 
         Returns:
             httpx.Response: the httpx.Response object
         """
-        return self.get(f"/pro/result/{uuid}/similar", params=kwargs)
+        return self.get(f"/api/v1/pro/result/{query}/similar", params=kwargs)
 
 class AsyncURLScanConnector(AsyncBroker):
     """
@@ -116,7 +116,7 @@ class AsyncURLScanConnector(AsyncBroker):
         Async search for archived scans matching a given query.
         """
         params = {"q": query, **kwargs}
-        return await self.get("/search/", params=params)
+        return await self.get("/api/v1/search/", params=params)
 
     @log_method_call
     async def scan(self, query: str, **kwargs: Dict[str, Any]) -> httpx.Response:
@@ -124,25 +124,25 @@ class AsyncURLScanConnector(AsyncBroker):
         Async submit a URL to be scanned by urlscan.io.
         """
         payload = {"url": query, **kwargs}
-        return await self.post("/scan", json=payload)
+        return await self.post("/api/v1/scan", json=payload)
 
     @log_method_call
-    async def results(self, uuid: str, **kwargs: Dict[str, Any]) -> httpx.Response:
+    async def results(self, query: str, **kwargs: Dict[str, Any]) -> httpx.Response:
         """
         Async retrieve detailed scan results by UUID.
         """
-        return await self.get(f"/result/{uuid}", params=kwargs)
+        return await self.get(f"/api/v1/result/{query}", params=kwargs)
 
     @log_method_call
-    async def get_dom(self, uuid: str, **kwargs: Dict[str, Any]) -> httpx.Response:
+    async def get_dom(self, query: str, **kwargs: Dict[str, Any]) -> httpx.Response:
         """
         Async retrieve the DOM snapshot for a given scan UUID.
         """
-        return await self.get(f"https://urlscan.io/dom/{uuid}", params=kwargs)
+        return await self.get(f"/dom/{query}", params=kwargs)
 
     @log_method_call
-    async def structure_search(self, uuid: str, **kwargs: Dict[str, Any]) -> httpx.Response:
+    async def structure_search(self, query: str, **kwargs: Dict[str, Any]) -> httpx.Response:
         """
         Async search for scans structurally similar to a given UUID.
         """
-        return await self.get(f"/pro/result/{uuid}/similar", params=kwargs)
+        return await self.get(f"/api/v1/pro/result/{query}/similar", params=kwargs)
