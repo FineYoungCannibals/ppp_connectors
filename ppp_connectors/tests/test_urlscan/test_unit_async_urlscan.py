@@ -27,7 +27,7 @@ async def test_async_search_makes_expected_call(monkeypatch):
     connector = AsyncURLScanConnector(api_key="testkey")
 
     async def mock_get(path, params=None):
-        assert path == "/search/"
+        assert path == "/api/v1/search/"
         assert params["q"] == "example.com"
         return Response(200, request=Request("GET", path))
 
@@ -40,7 +40,7 @@ async def test_async_scan_makes_expected_call(monkeypatch):
     connector = AsyncURLScanConnector(api_key="testkey")
 
     async def mock_post(path, json=None):
-        assert path == "/scan"
+        assert path == "/api/v1/scan"
         assert json["url"] == "http://example.com"
         return Response(200, request=Request("POST", path))
 
