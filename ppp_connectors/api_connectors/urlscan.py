@@ -100,7 +100,7 @@ class AsyncURLScanConnector(AsyncBroker):
     """
 
     def __init__(self, api_key: Optional[str] = None, **kwargs):
-        super().__init__(base_url="https://urlscan.io/api/v1", **kwargs)
+        super().__init__(base_url="https://urlscan.io", **kwargs)
 
         self.api_key = api_key or self.env_config.get("URLSCAN_API_KEY")
         if not self.api_key:
