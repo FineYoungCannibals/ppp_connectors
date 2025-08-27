@@ -24,33 +24,70 @@ class FlashpointConnector(Broker):
 
     @log_method_call
     def search_communities(self, query: str, **kwargs) -> httpx.Response:
-        """Search Flashpoint communities data."""
+        """
+        Search Flashpoint communities data.
+
+        Args:
+            query (str): The search string used in the API query.
+            **kwargs: Additional query logic per the Flashpoint API documentation.
+        """
         return self.post("/sources/v2/communities", json={"query": query, **kwargs})
 
     @log_method_call
     def search_fraud(self, query: str, **kwargs) -> httpx.Response:
-        """Search Flashpoint fraud datasets."""
+        """
+        Search Flashpoint fraud datasets.
+
+        Args:
+            query (str): The search string used in the API query.
+            **kwargs: Additional query logic per the Flashpoint API documentation.
+        """
         return self.post("/sources/v2/fraud", json={"query": query, **kwargs})
 
     @log_method_call
     def search_marketplaces(self, query: str, **kwargs) -> httpx.Response:
-        """Search Flashpoint marketplace datasets."""
+        """
+        Search Flashpoint marketplace datasets.
+
+        Args:
+            query (str): The search string used in the API query.
+            **kwargs: Additional query logic per the Flashpoint API documentation.
+        """
         return self.post("/sources/v2/markets", json={"query": query, **kwargs})
 
     @log_method_call
     def search_media(self, query: str, **kwargs) -> httpx.Response:
-        """Search OCR-processed media from Flashpoint."""
+        """
+        Search OCR-processed media from Flashpoint.
+
+        Args:
+            query (str): The search string used in the API query.
+            **kwargs: Additional query logic per the Flashpoint API documentation.
+        """
         return self.post("/sources/v2/media", json={"query": query, **kwargs})
 
     @log_method_call
-    def get_media_object(self, media_id: str) -> httpx.Response:
-        """Retrieve metadata for a specific media object."""
-        return self.get(f"/sources/v2/media/{media_id}")
+    def get_media_object(self, query: str, **kwargs) -> httpx.Response:
+        """
+        Retrieve metadata for a specific media object.
+
+        Args:
+            query (str): The media_id of the object to retrieve.
+            **kwargs: Additional request options.
+        """
+        return self.get(f"/sources/v2/media/{query}")
 
     @log_method_call
-    def get_media_image(self, storage_uri: str) -> httpx.Response:
-        """Download image asset by storage_uri."""
-        return self.get("/sources/v1/media/", params={"asset_id": storage_uri})
+    def get_media_image(self, query: str, **kwargs) -> httpx.Response:
+        """
+        Download image asset by storage_uri.
+
+        Args:
+            query (str): The storage_uri (asset_id) of the image to download.
+            **kwargs: Additional request options.
+        """
+        safe_headers = {"Authorization": f"Bearer {self.api_key}"}
+        return self.get("/sources/v1/media/", headers=safe_headers, params={"asset_id": query})
 
 
 # Async version of FlashpointConnector
@@ -72,24 +109,65 @@ class AsyncFlashpointConnector(AsyncBroker):
 
     @log_method_call
     async def search_communities(self, query: str, **kwargs) -> httpx.Response:
+        """
+        Search Flashpoint communities data.
+
+        Args:
+            query (str): The search string used in the API query.
+            **kwargs: Additional query logic per the Flashpoint API documentation.
+        """
         return await self.post("/sources/v2/communities", json={"query": query, **kwargs})
 
     @log_method_call
     async def search_fraud(self, query: str, **kwargs) -> httpx.Response:
+        """
+        Search Flashpoint fraud datasets.
+
+        Args:
+            query (str): The search string used in the API query.
+            **kwargs: Additional query logic per the Flashpoint API documentation.
+        """
         return await self.post("/sources/v2/fraud", json={"query": query, **kwargs})
 
     @log_method_call
     async def search_marketplaces(self, query: str, **kwargs) -> httpx.Response:
+        """
+        Search Flashpoint marketplace datasets.
+
+        Args:
+            query (str): The search string used in the API query.
+            **kwargs: Additional query logic per the Flashpoint API documentation.
+        """
         return await self.post("/sources/v2/markets", json={"query": query, **kwargs})
 
     @log_method_call
     async def search_media(self, query: str, **kwargs) -> httpx.Response:
+        """
+        Search OCR-processed media from Flashpoint.
+
+        Args:
+            query (str): The search string used in the API query.
+            **kwargs: Additional query logic per the Flashpoint API documentation.
+        """
         return await self.post("/sources/v2/media", json={"query": query, **kwargs})
 
     @log_method_call
-    async def get_media_object(self, media_id: str) -> httpx.Response:
-        return await self.get(f"/sources/v2/media/{media_id}")
+    async def get_media_object(self, query: str) -> httpx.Response:
+        """
+        Retrieve metadata for a specific media object.
+
+        Args:
+            query (str): The media_id of the object to retrieve.
+        """
+        return await self.get(f"/sources/v2/media/{query}")
 
     @log_method_call
-    async def get_media_image(self, storage_uri: str) -> httpx.Response:
-        return await self.get("/sources/v1/media/", params={"asset_id": storage_uri})
+    async def get_media_image(self, query: str) -> httpx.Response:
+        """
+        Download image asset by storage_uri.
+
+        Args:
+            query (str): The storage_uri (asset_id) of the image to download.
+        """
+        safe_headers = {"Authorization": f"Bearer {self.api_key}"}
+        return await self.get("/sources/v1/media/", headers=safe_headers, params={"asset_id": query})
