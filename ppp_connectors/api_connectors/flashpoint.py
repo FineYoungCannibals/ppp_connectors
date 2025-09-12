@@ -89,6 +89,17 @@ class FlashpointConnector(Broker):
         safe_headers = {"Authorization": f"Bearer {self.api_key}"}
         return self.get("/sources/v1/media/", headers=safe_headers, params={"asset_id": query})
 
+    @log_method_call
+    def search_checks(self, query: str, **kwargs) -> httpx.Response:
+        """
+        Search Flashpoint fraud check datasets.
+
+        Args:
+            query (str): The search string used in the API query.
+            **kwargs: Additional query logic per the Flashpoint API documentation.
+        """
+        return self.post("/sources/v2/fraud/checks", json={"query": query, **kwargs})
+
 
 # Async version of FlashpointConnector
 @bubble_broker_init_signature()
@@ -171,3 +182,14 @@ class AsyncFlashpointConnector(AsyncBroker):
         """
         safe_headers = {"Authorization": f"Bearer {self.api_key}"}
         return await self.get("/sources/v1/media/", headers=safe_headers, params={"asset_id": query})
+
+    @log_method_call
+    async def search_checks(self, query: str, **kwargs) -> httpx.Response:
+        """
+        Search Flashpoint fraud check datasets asynchronously.
+
+        Args:
+            query (str): The search string used in the API query.
+            **kwargs: Additional query logic per the Flashpoint API documentation.
+        """
+        return await self.post("/sources/v2/fraud/checks", json={"query": query, **kwargs})
