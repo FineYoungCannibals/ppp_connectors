@@ -183,15 +183,78 @@ print(response.http_version)
 
 ## 🗃️ DBMS Connectors
 
-Each database connector follows a class-based pattern and supports reusable sessions, query helpers, and in some cases `bulk_insert`.
+Each database connector follows a class-based pattern and supports reusable sessions, query helpers, and in some cases bulk helpers (e.g., `insert_many`, `bulk_insert`, etc.).
 
 ### MongoDB
 
+Note: `query(...)` is deprecated in favor of `find(filter=..., projection=..., batch_size=...)`. The `query` method remains as a compatibility alias and logs a deprecation warning.
+
+Sync connector
 ```python
 from ppp_connectors.dbms_connectors.mongo import MongoConnector
 
-conn = MongoConnector("mongodb://localhost:27017", username="root", password="example")
-conn.bulk_insert("mydb", "mycol", [{"foo": "bar"}])
+# Recommended: use as a context manager (auto-closes)
+with MongoConnector(
+    "mongodb://localhost:27017",
+    username="root",
+    password="example",
+    auth_retry_attempts=3,
+    auth_retry_wait=1.0,
+) as conn:
+    # Clean up prior test docs
+    conn.delete_many("mydb", "mycol", {"_sample": True})
+
+    # Insert and upsert
+    conn.insert_many("mydb", "mycol", [{"_id": 1, "foo": "bar", "_sample": True}])
+    conn.upsert_many(
+        "mydb",
+        "mycol",
+        [{"_id": 1, "foo": "baz", "_sample": True}, {"_id": 2, "foo": "qux", "_sample": True}],
+        unique_key="_id",
+    )
+
+    # Find with projection and paging
+    for doc in conn.find("mydb", "mycol", filter={"_sample": True}, projection={"_id": 1, "foo": 1}, batch_size=100):
+        print(doc)
+
+    # Distinct values
+    vals = conn.distinct("mydb", "mycol", key="foo", filter={"_sample": True})
+    print(vals)
+
+# Manual lifecycle control is also supported
+conn = MongoConnector("mongodb://localhost:27017")
+try:
+    list(conn.find("mydb", "mycol", filter={}))
+finally:
+    conn.close()
+```
+
+Async connector
+```python
+import asyncio
+from ppp_connectors.dbms_connectors.mongo_async import AsyncMongoConnector
+
+async def main():
+    async with AsyncMongoConnector(
+        "mongodb://localhost:27017",
+        username="root",
+        password="example",
+        auth_retry_attempts=3,
+        auth_retry_wait=1.0,
+    ) as conn:
+        await conn.delete_many("mydb", "mycol", {"_sample": True})
+        await conn.insert_many("mydb", "mycol", [{"_id": 1, "foo": "bar", "_sample": True}])
+        await conn.upsert_many(
+            "mydb", "mycol",
+            [{"_id": 1, "foo": "baz", "_sample": True}],
+            unique_key="_id",
+        )
+        async for doc in conn.find("mydb", "mycol", filter={"_sample": True}, projection={"_id": 1, "foo": 1}):
+            print(doc)
+        vals = await conn.distinct("mydb", "mycol", key="foo", filter={"_sample": True})
+        print(vals)
+
+asyncio.run(main())
 ```
 
 ### Elasticsearch
