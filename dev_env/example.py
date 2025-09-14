@@ -11,15 +11,14 @@ client = MongoConnector(
     password=env_config["MONGO_PASS"]
 )
 
-# Query
-results = client.query(
+# Find
+results = client.find(
     db_name=env_config["MONGO_DB"],
     collection=env_config["MONGO_COLLECTION"],
-    query={},
+    filter={},
     projection=None,
     batch_size=100
 )
 
 for row in results:
     print(row)
-
