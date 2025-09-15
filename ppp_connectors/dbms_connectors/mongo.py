@@ -152,6 +152,38 @@ class MongoConnector:
         for doc in cursor:
             yield doc
 
+    def aggregate(
+        self,
+        db_name: str,
+        collection: str,
+        pipeline: List[Dict[str, Any]],
+        batch_size: Optional[int] = None,
+        **kwargs: Any,
+    ) -> Generator[Dict[str, Any], None, None]:
+        """
+        Run an aggregation pipeline on a collection and stream results.
+
+        Args:
+            db_name (str): Name of the database.
+            collection (str): Name of the collection.
+            pipeline (List[Dict[str, Any]]): Aggregation pipeline stages.
+            batch_size (Optional[int]): If provided, set cursor batch size.
+            **kwargs: Additional options forwarded to `Collection.aggregate` (e.g.,
+                allowDiskUse, collation, maxTimeMS, comment).
+
+        Yields:
+            Dict[str, Any]: Each document from the aggregation result.
+        """
+        self._log(
+            f"Executing Mongo aggregate on {db_name}.{collection} with pipeline: {pipeline}"
+        )
+        col = self.client[db_name][collection]
+        cursor = col.aggregate(pipeline, **kwargs)
+        if batch_size is not None:
+            cursor = cursor.batch_size(batch_size)
+        for doc in cursor:
+            yield doc
+
     def query(
         self,
         db_name: str,

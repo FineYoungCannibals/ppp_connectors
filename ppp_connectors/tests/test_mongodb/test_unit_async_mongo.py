@@ -73,3 +73,37 @@ async def test_async_find(monkeypatch):
         out = [doc async for doc in conn.find("db", "col", filter={})]
 
     assert out == docs
+
+
+@pytest.mark.asyncio
+async def test_async_aggregate(monkeypatch):
+    docs = [{"_id": 1, "count": 2}, {"_id": 2, "count": 3}]
+
+    class _FakeCollection:
+        def aggregate(self, pipeline, **kwargs):
+            return _AsyncCursor(docs)
+
+    class _FakeDB(dict):
+        def __getitem__(self, k):
+            return _FakeCollection()
+
+    class _FakeClient:
+        def __init__(self):
+            self.admin = types.SimpleNamespace()
+            self.admin.command = AsyncMock(return_value={"ok": 1})
+
+        def __getitem__(self, k):
+            return _FakeDB()
+
+        def close(self):
+            pass
+
+    fake_client = _FakeClient()
+    ns = types.SimpleNamespace(AsyncMongoClient=lambda *a, **k: fake_client)
+    monkeypatch.setitem(sys.modules, "pymongo.asynchronous.mongo_client", ns)
+
+    out = []
+    async with AsyncMongoConnector(uri="mongodb://localhost:27017") as conn:
+        out = [doc async for doc in conn.aggregate("db", "col", pipeline=[{"$match": {}}], batch_size=50)]
+
+    assert out == docs

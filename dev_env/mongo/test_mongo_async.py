@@ -57,7 +57,15 @@ async def main() -> None:
         roles = await client.distinct(db, col, key="role", filter={"_sample": True})
         print("[async] Distinct roles:", roles)
 
+        logger.info("[async] Running aggregate pipeline to count docs per role...")
+        pipeline = [
+            {"$match": {"_sample": True}},
+            {"$group": {"_id": "$role", "count": {"$sum": 1}}},
+            {"$sort": {"count": -1}},
+        ]
+        async for doc in client.aggregate(db, col, pipeline, allowDiskUse=True):
+            print("[async] Aggregated:", doc)
+
 
 if __name__ == "__main__":
     asyncio.run(main())
-

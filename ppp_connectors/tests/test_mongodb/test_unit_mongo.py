@@ -82,6 +82,30 @@ def test_distinct(monkeypatch):
     mock_collection.distinct.assert_called_once_with("field", {"x": 1}, maxTimeMS=5000)
 
 
+def test_aggregate(monkeypatch):
+    mock_cursor = [
+        {"_id": 1, "count": 10},
+        {"_id": 2, "count": 5},
+    ]
+    mock_collection = MagicMock()
+    # aggregate().batch_size() returns an iterable cursor
+    mock_collection.aggregate.return_value.batch_size.return_value = mock_cursor
+
+    fake_client = MagicMock()
+    fake_client.admin.command.return_value = {"ok": 1}
+    fake_client.__getitem__.return_value.__getitem__.return_value = mock_collection
+    monkeypatch.setattr(
+        "ppp_connectors.dbms_connectors.mongo.MongoClient",
+        MagicMock(return_value=fake_client),
+    )
+
+    connector = MongoConnector(uri="mongodb://localhost:27017")
+    pipeline = [{"$match": {"x": {"$gt": 1}}}, {"$group": {"_id": "$x", "count": {"$sum": 1}}}]
+    out = list(connector.aggregate("db", "col", pipeline, batch_size=100, allowDiskUse=True))
+    assert out == mock_cursor
+    mock_collection.aggregate.assert_called_once_with(pipeline, allowDiskUse=True)
+
+
 def test_mongo_connection_failure():
     with pytest.raises(ServerSelectionTimeoutError):
         MongoConnector(

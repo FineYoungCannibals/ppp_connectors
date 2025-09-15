@@ -55,6 +55,15 @@ def main() -> None:
         roles = client.distinct(db, col, key="role", filter={"_sample": True})
         print("Distinct roles:", roles)
 
+        logger.info("Running aggregate pipeline to count docs per role...")
+        pipeline = [
+            {"$match": {"_sample": True}},
+            {"$group": {"_id": "$role", "count": {"$sum": 1}}},
+            {"$sort": {"count": -1}},
+        ]
+        for doc in client.aggregate(db, col, pipeline, allowDiskUse=True):
+            print("Aggregated:", doc)
+
 
 if __name__ == "__main__":
     main()
