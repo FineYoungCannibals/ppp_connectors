@@ -152,6 +152,37 @@ class AsyncMongoConnector:
         async for doc in cursor:
             yield doc
 
+    async def aggregate(
+        self,
+        db_name: str,
+        collection: str,
+        pipeline: List[Dict[str, Any]],
+        batch_size: Optional[int] = None,
+        **kwargs: Any,
+    ) -> AsyncIterator[Dict[str, Any]]:
+        """
+        Async aggregation pipeline execution yielding documents.
+
+        Args:
+            db_name (str): Name of the database.
+            collection (str): Name of the collection.
+            pipeline (List[Dict[str, Any]]): Aggregation pipeline stages.
+            batch_size (Optional[int]): If provided, set cursor batch size.
+            **kwargs: Additional options for `Collection.aggregate` (e.g., allowDiskUse).
+
+        Yields:
+            Each document from the aggregation result.
+        """
+        self._log(
+            f"Executing async Mongo aggregate on {db_name}.{collection} with pipeline: {pipeline}"
+        )
+        col = self.client[db_name][collection]
+        cursor = await col.aggregate(pipeline, **kwargs)
+        if batch_size is not None:
+            cursor = cursor.batch_size(batch_size)
+        async for doc in cursor:
+            yield doc
+
     async def insert_many(
         self,
         db_name: str,
