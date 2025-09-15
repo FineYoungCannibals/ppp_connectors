@@ -102,6 +102,7 @@ async def test_async_aggregate(monkeypatch):
     ns = types.SimpleNamespace(AsyncMongoClient=lambda *a, **k: fake_client)
     monkeypatch.setitem(sys.modules, "pymongo.asynchronous.mongo_client", ns)
 
+    out = []
     async with AsyncMongoConnector(uri="mongodb://localhost:27017") as conn:
         out = [doc async for doc in conn.aggregate("db", "col", pipeline=[{"$match": {}}], batch_size=50)]
 

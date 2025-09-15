@@ -172,12 +172,18 @@ class AsyncMongoConnector:
 
         Yields:
             Each document from the aggregation result.
+
+        Note:
+            This returns an async iterator. Use `async for` to consume it.
+            Do not `await` the return value directly.
         """
         self._log(
             f"Executing async Mongo aggregate on {db_name}.{collection} with pipeline: {pipeline}"
         )
         col = self.client[db_name][collection]
-        cursor = await col.aggregate(pipeline, **kwargs)
+        # Some PyMongo async versions require awaiting aggregate() to get a cursor
+        result = col.aggregate(pipeline, **kwargs)
+        cursor = await result if inspect.isawaitable(result) else result
         if batch_size is not None:
             cursor = cursor.batch_size(batch_size)
         async for doc in cursor:
