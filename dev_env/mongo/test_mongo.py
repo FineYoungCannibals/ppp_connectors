@@ -64,6 +64,46 @@ def main() -> None:
         for doc in client.aggregate(db, col, pipeline, allowDiskUse=True):
             print("Aggregated:", doc)
 
+        # --- Test upsert_many with single-field unique_key (string) ---
+        print("\n--- upsert_many test: single-field unique_key ('email') ---")
+        # Clean up any prior test docs
+        client.delete_many(db, col, {"_test_email": True})
+        email_docs = [
+            {"email": "alice@example.com", "name": "Alice", "age": 30, "_test_email": True},
+            {"email": "bob@example.com", "name": "Bob", "age": 25, "_test_email": True},
+        ]
+        client.insert_many(db, col, email_docs, ordered=False)
+        # Upsert: update Bob, insert Carol
+        email_upserts = [
+            {"email": "bob@example.com", "name": "Bob", "age": 26, "_test_email": True},   # update
+            {"email": "carol@example.com", "name": "Carol", "age": 22, "_test_email": True}, # insert
+        ]
+        client.upsert_many(db, col, email_upserts, unique_key="email", ordered=False)
+        print("After upsert_many (email):")
+        for doc in client.find(db, col, filter={"_test_email": True}, projection={"_id": 0, "email": 1, "name": 1, "age": 1}):
+            print(doc)
+
+        # --- Test upsert_many with compound unique_key (list of strings) ---
+        print("\n--- upsert_many test: compound unique_key (['scan_uuid', 'domain']) ---")
+        client.delete_many(db, col, {"_test_scan": True})
+        scan_docs = [
+            {"scan_uuid": "s1", "domain": "a.com", "result": "OK", "_test_scan": True},
+            {"scan_uuid": "s2", "domain": "b.com", "result": "FAIL", "_test_scan": True},
+        ]
+        client.insert_many(db, col, scan_docs, ordered=False)
+        # Upsert: update s2/b.com, insert s3/c.com
+        scan_upserts = [
+            {"scan_uuid": "s2", "domain": "b.com", "result": "PASS", "_test_scan": True},   # update
+            {"scan_uuid": "s3", "domain": "c.com", "result": "OK", "_test_scan": True},     # insert
+        ]
+        client.upsert_many(db, col, scan_upserts, unique_key=["scan_uuid", "domain"], ordered=False)
+        print("After upsert_many (compound):")
+        for doc in client.find(
+            db, col, filter={"_test_scan": True},
+            projection={"_id": 0, "scan_uuid": 1, "domain": 1, "result": 1}
+        ):
+            print(doc)
+
 
 if __name__ == "__main__":
     main()
