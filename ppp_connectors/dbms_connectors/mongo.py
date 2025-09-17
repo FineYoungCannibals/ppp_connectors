@@ -6,7 +6,7 @@ from pymongo.errors import (
     ConnectionFailure,
 )
 from tenacity import Retrying, stop_after_attempt, wait_fixed, retry_if_exception_type
-from typing import List, Dict, Any, Optional, Generator, Type
+from typing import List, Dict, Any, Optional, Generator, Type, Union
 from types import TracebackType
 from ppp_connectors.helpers import setup_logger
 
@@ -250,18 +250,19 @@ class MongoConnector:
         db_name: str,
         collection: str,
         data: List[Dict],
-        unique_key: Optional[str],
+        unique_key: Optional[Union[str, List[str]]],
         ordered: bool = False,
         batch_size: int = 1000,
     ):
         """
-        Upsert multiple documents into a collection using a unique key (batched).
+        Upsert multiple documents into a collection using a unique key or keys (batched).
 
         Args:
             db_name (str): Name of the database.
             collection (str): Name of the collection.
             data (List[Dict]): Documents to upsert.
-            unique_key (Optional[str]): Field to use for upsert filtering. Required.
+            unique_key (Optional[Union[str, List[str]]]): Field name or list of field names to use for upsert filtering.
+                If a list, the filter is built as a compound key using all specified fields.
             ordered (bool): Whether operations should be ordered. Defaults to False.
             batch_size (int): Number of documents per batch. Defaults to 1000.
 
@@ -269,8 +270,9 @@ class MongoConnector:
             List: List of BulkWriteResult objects for each batch.
 
         Details:
-            Uses `bulk_write` with `UpdateOne({unique_key: value}, {"$set": doc}, upsert=True)`
-            to merge fields from each document. The `unique_key` must exist in each document.
+            Uses `bulk_write` with `UpdateOne(filter, {"$set": doc}, upsert=True)`
+            to merge fields from each document. The `unique_key` or all keys in the list
+            must exist in each document.
         """
         if not unique_key:
             raise ValueError("unique_key must be provided for upsert_many")
@@ -281,10 +283,21 @@ class MongoConnector:
         results = []
         for i in range(0, len(data), batch_size):
             batch = data[i:i + batch_size]
-            operations = [
-                UpdateOne({unique_key: doc[unique_key]}, {"$set": doc}, upsert=True)
-                for doc in batch if unique_key in doc
-            ]
+            operations = []
+            for doc in batch:
+                if isinstance(unique_key, str):
+                    if unique_key in doc:
+                        filter_doc = {unique_key: doc[unique_key]}
+                    else:
+                        continue
+                elif isinstance(unique_key, list):
+                    if all(k in doc for k in unique_key):
+                        filter_doc = {k: doc[k] for k in unique_key}
+                    else:
+                        continue
+                else:
+                    raise ValueError("unique_key must be either a string or a list of strings")
+                operations.append(UpdateOne(filter_doc, {"$set": doc}, upsert=True))
             if operations:
                 result = col.bulk_write(operations, ordered=ordered)
                 results.append(result)

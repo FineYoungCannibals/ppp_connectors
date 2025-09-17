@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Dict, List, Optional, AsyncIterator, Type
+from typing import Any, Dict, List, Optional, AsyncIterator, Type, Union
 from types import TracebackType
 import inspect
 from pymongo import UpdateOne
@@ -220,7 +220,7 @@ class AsyncMongoConnector:
         db_name: str,
         collection: str,
         data: List[Dict[str, Any]],
-        unique_key: Optional[str],
+        unique_key: Optional[Union[str, List[str]]],
         ordered: bool = False,
         batch_size: int = 1000,
     ) -> List[Any]:
@@ -228,11 +228,17 @@ class AsyncMongoConnector:
         Async upsert multiple documents using a unique key (batched).
 
         Uses `bulk_write` with `UpdateOne(..., upsert=True)` and `$set` to
-        merge fields from each document. The `unique_key` must be present in
-        each document and is used to build the filter.
+        merge fields from each document.
+
+        Args:
+            unique_key (Union[str, List[str]]): A string key or list of strings representing
+                the unique key(s) used to build the filter for upsert operations.
+                If a list is provided, it is treated as a compound unique key.
         """
         if not unique_key:
             raise ValueError("unique_key must be provided for upsert_many")
+        if not (isinstance(unique_key, str) or (isinstance(unique_key, list) and all(isinstance(k, str) for k in unique_key))):
+            raise ValueError("unique_key must be a string or a list of strings")
         self._log(
             f"async upsert_many: upserting {len(data)} docs into {db_name}.{collection} with batch_size={batch_size}, unique_key={unique_key}"
         )
@@ -240,11 +246,19 @@ class AsyncMongoConnector:
         results: List[Any] = []
         for i in range(0, len(data), batch_size):
             batch = data[i : i + batch_size]
-            operations = [
-                UpdateOne({unique_key: doc[unique_key]}, {"$set": doc}, upsert=True)
-                for doc in batch
-                if unique_key in doc
-            ]
+            operations = []
+            for doc in batch:
+                if isinstance(unique_key, str):
+                    if unique_key in doc:
+                        filter_doc = {unique_key: doc[unique_key]}
+                    else:
+                        continue
+                else:
+                    # unique_key is a list of strings
+                    filter_doc = {k: doc[k] for k in unique_key if k in doc}
+                    if len(filter_doc) != len(unique_key):
+                        continue
+                operations.append(UpdateOne(filter_doc, {"$set": doc}, upsert=True))
             if operations:
                 result = await col.bulk_write(operations, ordered=ordered)
                 results.append(result)
