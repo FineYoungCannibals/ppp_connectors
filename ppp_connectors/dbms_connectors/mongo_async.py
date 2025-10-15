@@ -13,6 +13,9 @@ from tenacity import AsyncRetrying, stop_after_attempt, wait_fixed, retry_if_exc
 from ppp_connectors.helpers import setup_logger
 
 
+_DEFAULT_LOGGER = object()
+
+
 class AsyncMongoConnector:
     """
     An asyncio connector for interacting with MongoDB using PyMongo's async client.
@@ -30,7 +33,7 @@ class AsyncMongoConnector:
         timeout (int): Server selection timeout in seconds. Defaults to 10.
         auth_mechanism (Optional[str]): Authentication mechanism for MongoDB (e.g., "SCRAM-SHA-1").
         ssl (Optional[bool]): Whether to use SSL for the connection.
-        logger (Optional[Any]): Logger instance for logging actions. Defaults to None.
+        logger (Optional[Any]): Logger instance for logging actions. Defaults to a module logger when omitted; pass None to disable logging.
         auth_retry_attempts (int): Number of attempts for initial auth ping. Defaults to 3.
         auth_retry_wait (float): Seconds to wait between auth attempts. Defaults to 1.0.
     """
@@ -44,7 +47,7 @@ class AsyncMongoConnector:
         timeout: int = 10,
         auth_mechanism: Optional[str] = "DEFAULT",
         ssl: Optional[bool] = True,
-        logger: Optional[Any] = None,
+        logger: Optional[Any] = _DEFAULT_LOGGER,
         auth_retry_attempts: int = 3,
         auth_retry_wait: float = 1.0,
     ) -> None:
@@ -82,7 +85,7 @@ class AsyncMongoConnector:
             ssl=ssl,
             serverSelectionTimeoutMS=timeout * 1000,
         )
-        self.logger = logger or setup_logger(__name__)
+        self.logger = setup_logger(__name__) if logger is _DEFAULT_LOGGER else logger
         self._log(
             f"Initialized AsyncMongoClient with authSource={auth_source}, "
             f"authMechanism={auth_mechanism}, ssl={ssl}"
@@ -145,7 +148,7 @@ class AsyncMongoConnector:
             Each document as a dictionary.
         """
         self._log(
-            f"Executing async Mongo find on {db_name}.{collection} with filter: {filter}"
+            f"Executing async Mongo find on {db_name}.{collection}"
         )
         col = self.client[db_name][collection]
         cursor = col.find(filter, projection).batch_size(batch_size)
@@ -178,7 +181,7 @@ class AsyncMongoConnector:
             Do not `await` the return value directly.
         """
         self._log(
-            f"Executing async Mongo aggregate on {db_name}.{collection} with pipeline: {pipeline}"
+            f"Executing async Mongo aggregate on {db_name}.{collection}"
         )
         col = self.client[db_name][collection]
         # Some PyMongo async versions require awaiting aggregate() to get a cursor
@@ -274,7 +277,7 @@ class AsyncMongoConnector:
     ) -> List[Any]:
         """Async distinct values for a key, with optional filter."""
         self._log(
-            f"Executing async Mongo distinct on {db_name}.{collection} for key='{key}' with filter: {filter or {}}"
+            f"Executing async Mongo distinct on {db_name}.{collection} for key='{key}'"
         )
         col = self.client[db_name][collection]
         return await col.distinct(key, filter, **kwargs)
@@ -288,7 +291,7 @@ class AsyncMongoConnector:
     ) -> Any:
         """Async delete a single document matching the filter."""
         self._log(
-            f"Async deleting one from {db_name}.{collection} with filter: {filter}",
+            f"Async deleting one from {db_name}.{collection}",
             level="info",
         )
         col = self.client[db_name][collection]
@@ -303,7 +306,7 @@ class AsyncMongoConnector:
     ) -> Any:
         """Async delete all documents matching the filter."""
         self._log(
-            f"Async deleting many from {db_name}.{collection} with filter: {filter}",
+            f"Async deleting many from {db_name}.{collection}",
             level="info",
         )
         col = self.client[db_name][collection]
