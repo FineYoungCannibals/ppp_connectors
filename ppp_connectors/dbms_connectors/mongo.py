@@ -11,6 +11,9 @@ from types import TracebackType
 from ppp_connectors.helpers import setup_logger
 
 
+_DEFAULT_LOGGER = object()
+
+
 class MongoConnector:
     """
     A connector class for interacting with MongoDB.
@@ -34,7 +37,7 @@ class MongoConnector:
         timeout: int = 10,
         auth_mechanism: Optional[str] = "DEFAULT",
         ssl: Optional[bool] = True,
-        logger: Optional[Any] = None,
+        logger: Optional[Any] = _DEFAULT_LOGGER,
         auth_retry_attempts: int = 3,
         auth_retry_wait: float = 1.0,
     ):
@@ -49,7 +52,7 @@ class MongoConnector:
             timeout (int): Server selection timeout in seconds. Defaults to 10.
             auth_mechanism (Optional[str]): Authentication mechanism for MongoDB (e.g., "SCRAM-SHA-1").
             ssl (Optional[bool]): Whether to use SSL for the connection.
-            logger (Optional[Any]): Logger instance for logging actions. Defaults to None.
+            logger (Optional[Any]): Logger instance for logging actions. Defaults to a module logger when omitted; pass None to disable logging.
             auth_retry_attempts (int): Number of attempts for initial auth ping. Defaults to 3.
             auth_retry_wait (float): Seconds to wait between auth attempts. Defaults to 1.0.
         """
@@ -63,7 +66,7 @@ class MongoConnector:
             ssl=ssl,
             serverSelectionTimeoutMS=timeout * 1000
         )
-        self.logger = logger or setup_logger(__name__)
+        self.logger = setup_logger(__name__) if logger is _DEFAULT_LOGGER else logger
         self.auth_retry_attempts = auth_retry_attempts
         self.auth_retry_wait = auth_retry_wait
         self._log(
@@ -146,7 +149,7 @@ class MongoConnector:
         Logs:
             Logs the find operation with filter details.
         """
-        self._log(f"Executing Mongo find on {db_name}.{collection} with filter: {filter}")
+        self._log(f"Executing Mongo find on {db_name}.{collection}")
         col = self.client[db_name][collection]
         cursor = col.find(filter, projection).batch_size(batch_size)
         for doc in cursor:
@@ -175,7 +178,7 @@ class MongoConnector:
             Dict[str, Any]: Each document from the aggregation result.
         """
         self._log(
-            f"Executing Mongo aggregate on {db_name}.{collection} with pipeline: {pipeline}"
+            f"Executing Mongo aggregate on {db_name}.{collection}"
         )
         col = self.client[db_name][collection]
         cursor = col.aggregate(pipeline, **kwargs)
@@ -329,7 +332,7 @@ class MongoConnector:
             List[Any]: Distinct values for the specified key.
         """
         self._log(
-            f"Executing Mongo distinct on {db_name}.{collection} for key='{key}' with filter: {filter or {}}"
+            f"Executing Mongo distinct on {db_name}.{collection} for key='{key}'"
         )
         col = self.client[db_name][collection]
         return col.distinct(key, filter, **kwargs)
@@ -354,7 +357,7 @@ class MongoConnector:
             DeleteResult: The result of the delete operation.
         """
         self._log(
-            f"Deleting one from {db_name}.{collection} with filter: {filter}",
+            f"Deleting one from {db_name}.{collection}",
             level="info",
         )
         col = self.client[db_name][collection]
@@ -380,7 +383,7 @@ class MongoConnector:
             DeleteResult: The result of the delete operation.
         """
         self._log(
-            f"Deleting many from {db_name}.{collection} with filter: {filter}",
+            f"Deleting many from {db_name}.{collection}",
             level="info",
         )
         col = self.client[db_name][collection]
