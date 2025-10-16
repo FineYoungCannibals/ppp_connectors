@@ -628,7 +628,7 @@ version = "5.2.0"
 description = "DB API module for ODBC"
 optional = false
 python-versions = ">=3.8"
-groups = ["main"]
+groups = ["odbc"]
 markers = "platform_python_implementation == \"PyPy\""
 files = [
     {file = "pyodbc-5.2.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:eb0850e3e3782f57457feed297e220bb20c3e8fd7550d7a6b6bb96112bd9b6fe"},
