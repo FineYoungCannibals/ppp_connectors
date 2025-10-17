@@ -1,4 +1,9 @@
-import pyodbc
+try:
+    import pyodbc
+except ImportError as e:
+    raise ImportError(
+        "pyodbc is not installed. Install ppp_connectors[odbc] or add pyodbc to your deps."
+    ) from e
 from typing import List, Dict, Generator, Any
 from ppp_connectors.helpers import setup_logger
 

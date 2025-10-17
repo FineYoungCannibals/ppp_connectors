@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "ppp-connectors"
 packages = [{ include = "ppp_connectors" }]
-version = "1.1.8"
+version = "1.1.9"
 description = "A simple, lightweight set of connectors and functions to various APIs and DBMSs, controlled by a central broker."
 authors = ["Rob D'Aveta <rob.daveta@gmail.com>"]
 readme = "README.md"
@@ -12,9 +12,12 @@ python-dotenv = "^1.1.1"
 pymongo = "^4.15.0"
 elasticsearch = "^9.1.1"
 splunk-sdk = "^2.1.1"
-pyodbc = "^5.2.0"
+pyodbc = { version = "^5.2.0", optional = true }
 httpx = "^0.28.1"
 tenacity = "^9.1.2"
+
+[tool.poetry.extras]
+odbc = ["pyodbc"]
 
 [tool.poetry.group.dev.dependencies]
 python-dotenv = "^1.1.1"
