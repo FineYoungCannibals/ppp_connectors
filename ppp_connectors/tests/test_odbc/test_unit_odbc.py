@@ -1,4 +1,5 @@
 import pytest
+pyodbc = pytest.importorskip("pyodbc", reason="optional dependency")
 from unittest.mock import MagicMock, patch
 from ppp_connectors.dbms_connectors.odbc import ODBCConnector
 
