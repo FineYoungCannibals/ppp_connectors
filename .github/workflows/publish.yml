@@ -22,7 +22,7 @@ jobs:
         echo "$HOME/.local/bin" >> $GITHUB_PATH
 
     - name: Install dependencies
-      run: poetry install
+      run: poetry install --all-extras
 
     - name: Run unit tests only
       run: poetry run pytest -m "not integration"
