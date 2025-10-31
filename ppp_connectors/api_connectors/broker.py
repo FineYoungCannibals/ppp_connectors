@@ -1,11 +1,12 @@
 import httpx
 from httpx import Auth
-from typing import Optional, Dict, Any, Union, Iterable, Callable, ParamSpec, TypeVar
+from typing import Optional, Dict, Any, Union, Iterable, Callable, ParamSpec, TypeVar, Type
 from tenacity import retry, stop_after_attempt, wait_exponential, RetryError, retry_if_exception, AsyncRetrying
 from ppp_connectors.helpers import setup_logger, combine_env_configs
 from functools import wraps
 import inspect
 import os
+from types import TracebackType
 
 
 P = ParamSpec("P")
@@ -220,6 +221,17 @@ class Broker(SharedConnectorBase):
 
         self.session = httpx.Client(**client_args)
 
+    def __enter__(self) -> "Broker":
+        return self
+
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc: Optional[BaseException],
+        tb: Optional[TracebackType],
+    ) -> None:
+        self.session.close()
+
     def _make_request(
         self,
         method: str,
@@ -317,6 +329,17 @@ class AsyncBroker(SharedConnectorBase):
             trust_env=self.trust_env,
             **self._client_kwargs,
         )
+
+    async def __aenter__(self) -> "AsyncBroker":
+        return self
+
+    async def __aexit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc: Optional[BaseException],
+        tb: Optional[TracebackType],
+    ) -> None:
+        await self.session.aclose()
 
     async def _make_request(
         self,

@@ -52,7 +52,7 @@ All API connectors inherit from a common `Broker` abstraction that comes in two 
 - `Broker` for synchronous usage
 - `AsyncBroker` for asynchronous usage
 
-Each API connector has both a sync and async version (e.g., `URLScanConnector` and `AsyncURLScanConnector`) with **identical method names** and consistent behavior.
+Each API connector has both a sync and async version (e.g., `URLScanConnector` and `AsyncURLScanConnector`) with **identical method names** and consistent behavior. Additionally, both support context-management with `with` and `async with`.
 
 ### 🧰 Shared Features
 
