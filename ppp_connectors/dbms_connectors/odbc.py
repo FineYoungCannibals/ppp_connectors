@@ -1,11 +1,23 @@
-try:
-    import pyodbc
-except ImportError as e:
-    raise ImportError(
-        "pyodbc is not installed. Install ppp_connectors[odbc] or add pyodbc to your deps."
-    ) from e
-from typing import List, Dict, Generator, Any
+from importlib import import_module
+from typing import Any, Dict, Generator, List
 from ppp_connectors.helpers import setup_logger
+
+_PYODBC_MODULE = None
+
+
+def _get_pyodbc():
+    """
+    Lazily import pyodbc so the package stays importable without the optional dep.
+    """
+    global _PYODBC_MODULE
+    if _PYODBC_MODULE is None:
+        try:
+            _PYODBC_MODULE = import_module("pyodbc")
+        except ImportError as exc:
+            raise ImportError(
+                "pyodbc is not installed. Install ppp_connectors[odbc] or add pyodbc to your deps."
+            ) from exc
+    return _PYODBC_MODULE
 
 
 class ODBCConnector:
@@ -24,6 +36,7 @@ class ODBCConnector:
             conn_str (str): The ODBC connection string.
             logger (Any, optional): Logger instance for logging. Defaults to None.
         """
+        pyodbc = _get_pyodbc()
         self.conn = pyodbc.connect(conn_str)
         self.logger = logger or setup_logger(__name__)
         self._log("ODBC connection established")
