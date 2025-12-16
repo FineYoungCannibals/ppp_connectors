@@ -35,4 +35,5 @@ jobs:
           TWILIO_API_SID: dummy
           TWILIO_API_SECRET: dummy
           URLSCAN_API_KEY: dummy
+          PYTHONPATH: .
         run: poetry run pytest --ignore=dev_env
