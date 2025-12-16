@@ -4,8 +4,8 @@ A clean, modular set of Python connectors and utilities for working with both **
 
 ## ⚠️ **Deprecation notice**
 
-**APIary** is the successor to the `ppp-connectors` package.
-The original `ppp-connectors` package has been frozen at its final 0.x.x release
+`apiary` is the successor to the `ppp-connectors` package.
+The original `ppp-connectors` package has been frozen at its final 1.1.13 release
 and will continue to remain available on PyPI for existing users.
 New development and releases are published under the `apiary` package name.
 
