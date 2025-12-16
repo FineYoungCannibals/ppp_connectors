@@ -1,5 +1,5 @@
-from apiary.dbms_connectors.elasticsearch import ElasticsearchConnector
-from apiary.helpers import combine_env_configs, setup_logger
+from pyapiary.dbms_connectors.elasticsearch import ElasticsearchConnector
+from pyapiary.helpers import combine_env_configs, setup_logger
 from typing import Dict, Any
 import json
 

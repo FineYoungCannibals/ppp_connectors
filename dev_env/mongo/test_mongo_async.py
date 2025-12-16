@@ -1,8 +1,8 @@
 import asyncio
 from typing import Any, Dict, List
 
-from apiary.dbms_connectors.mongo_async import AsyncMongoConnector
-from apiary.helpers import combine_env_configs, setup_logger
+from pyapiary.dbms_connectors.mongo_async import AsyncMongoConnector
+from pyapiary.helpers import combine_env_configs, setup_logger
 
 
 async def main() -> None:

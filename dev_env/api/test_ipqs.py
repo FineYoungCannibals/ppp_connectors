@@ -1,6 +1,6 @@
-from apiary.api_connectors.ipqs import AsyncIPQSConnector, IPQSConnector
+from pyapiary.api_connectors.ipqs import AsyncIPQSConnector, IPQSConnector
 import asyncio
-from apiary.helpers import combine_env_configs, setup_logger
+from pyapiary.helpers import combine_env_configs, setup_logger
 from typing import Dict, Any
 import json
 

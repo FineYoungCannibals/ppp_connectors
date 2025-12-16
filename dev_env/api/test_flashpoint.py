@@ -1,4 +1,4 @@
-from apiary.api_connectors.flashpoint import FlashpointConnector
+from pyapiary.api_connectors.flashpoint import FlashpointConnector
 import httpx
 
 fp = FlashpointConnector(
