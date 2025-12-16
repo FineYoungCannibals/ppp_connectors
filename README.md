@@ -1,13 +1,13 @@
-# APIary
+# pyapiary
 
 A clean, modular set of Python connectors and utilities for working with both **APIs** and **DBMS backends**, unified by a centralized `Broker` abstraction and a consistent interface. Designed for easy testing, code reuse, and plug-and-play extensibility.
 
 ## ⚠️ **Deprecation notice**
 
-`apiary` is the successor to the `ppp-connectors` package.
+`pyapiary` is the successor to the `ppp-connectors` package.
 The original `ppp-connectors` package has been frozen at its final 1.1.13 release
 and will continue to remain available on PyPI for existing users.
-New development and releases are published under the `apiary` package name.
+New development and releases are published under the `pyapiary` package name.
 
 ## 📚 Table of Contents
 
@@ -76,7 +76,7 @@ Each API connector has both a sync and async version (e.g., `URLScanConnector` a
 
 ### 🌐 Sync Example (URLScan)
 ``` python
-from apiary.api_connectors.urlscan import URLScanConnector
+from pyapiary.api_connectors.urlscan import URLScanConnector
 
 scanner = URLScanConnector(load_env_vars=True)
 result = scanner.scan(url="https://example.com")
@@ -87,7 +87,7 @@ print(result.json())
 ### ⚡ Async Example (URLScan)
 ``` python
 import asyncio
-from apiary.api_connectors.urlscan import AsyncURLScanConnector
+from pyapiary.api_connectors.urlscan import AsyncURLScanConnector
 
 async def main():
    scanner = AsyncURLScanConnector(load_env_vars=True)
@@ -135,7 +135,7 @@ API connectors inherit from the `Broker` class and support flexible proxy config
 
 *Using a single proxy:*
 ```python
-from apiary.api_connectors.urlscan import URLScanConnector
+from pyapiary.api_connectors.urlscan import URLScanConnector
 conn = URLScanConnector(proxy="http://myproxy:8080")
 ```
 
@@ -196,7 +196,7 @@ Note: `query(...)` is deprecated in favor of `find(filter=..., projection=..., b
 
 Sync connector
 ```python
-from apiary.dbms_connectors.mongo import MongoConnector
+from pyapiary.dbms_connectors.mongo import MongoConnector
 
 # Recommended: use as a context manager (auto-closes)
 with MongoConnector(
@@ -237,7 +237,7 @@ finally:
 Async connector
 ```python
 import asyncio
-from apiary.dbms_connectors.mongo_async import AsyncMongoConnector
+from pyapiary.dbms_connectors.mongo_async import AsyncMongoConnector
 
 async def main():
     async with AsyncMongoConnector(
@@ -266,7 +266,7 @@ asyncio.run(main())
 
 ```python
 # The query method returns a generator; use list() or iterate to access results
-from apiary.dbms_connectors.elasticsearch import ElasticsearchConnector
+from pyapiary.dbms_connectors.elasticsearch import ElasticsearchConnector
 
 conn = ElasticsearchConnector(["http://localhost:9200"])
 results = list(conn.query("my-index", {"query": {"match_all": {}}}))
@@ -279,7 +279,7 @@ for doc in results:
 For automatic connection handling, use `ODBCConnector` as a context manager
 
 ```python
-from apiary.dbms_connectors.odbc import ODBCConnector
+from pyapiary.dbms_connectors.odbc import ODBCConnector
 
 with ODBCConnector("DSN=PostgresLocal;UID=postgres;PWD=postgres") as db:
    rows = conn.query("SELECT * FROM my_table")
@@ -289,7 +289,7 @@ with ODBCConnector("DSN=PostgresLocal;UID=postgres;PWD=postgres") as db:
 If you'd like to keep manual control, you can still use the `.close()` method
 
 ```python
-from apiary.dbms_connectors.odbc import ODBCConnector
+from pyapiary.dbms_connectors.odbc import ODBCConnector
 
 conn = ODBCConnector("DSN=PostgresLocal;UID=postgres;PWD=postgres")
 rows = conn.query("SELECT * FROM my_table")
@@ -300,7 +300,7 @@ conn.close()
 ### Splunk
 
 ```python
-from apiary.dbms_connectors.splunk import SplunkConnector
+from pyapiary.dbms_connectors.splunk import SplunkConnector
 
 conn = SplunkConnector("localhost", 8089, "admin", "admin123", scheme="https", verify=False)
 results = conn.query("search index=_internal | head 5")
@@ -344,8 +344,8 @@ markers =
 To add a new connector:
 
 1. **Module**: Place your module in:
-   - `src/apiary/api_connectors/` for API-based integrations
-   - `src/apiary/dbms_connectors/` for database-style connectors
+   - `src/pyapiary/api_connectors/` for API-based integrations
+   - `src/pyapiary/dbms_connectors/` for database-style connectors
 
 2. **Base class**:
    - Use the `Broker` class for APIs
@@ -371,8 +371,8 @@ To add a new connector:
 ## 🛠️ Dev Environment
 
 ```bash
-git clone https://github.com/robd518/apiary.git
-cd apiary
+git clone https://github.com/robd518/pyapiary.git
+cd pyapiary
 
 cp .env.example .env
 

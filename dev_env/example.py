@@ -1,5 +1,5 @@
-from apiary.dbms_connectors.mongo import MongoConnector
-from apiary.helpers import combine_env_configs
+from pyapiary.dbms_connectors.mongo import MongoConnector
+from pyapiary.helpers import combine_env_configs
 from typing import Dict, Any
 
 env_config: Dict[str, Any] = combine_env_configs()

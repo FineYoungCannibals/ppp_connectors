@@ -1,6 +1,6 @@
 from typing import Dict, Any, List
-from apiary.dbms_connectors.mongo import MongoConnector
-from apiary.helpers import combine_env_configs, setup_logger
+from pyapiary.dbms_connectors.mongo import MongoConnector
+from pyapiary.helpers import combine_env_configs, setup_logger
 
 
 def main() -> None:

@@ -1,7 +1,7 @@
 import asyncio
 from typing import Any, Dict, Iterable, Tuple
 
-from apiary.api_connectors.generic import AsyncGenericConnector
+from pyapiary.api_connectors.generic import AsyncGenericConnector
 
 # Give AsyncGenericConnector lightweight context-manager support without
 # modifying the library source.

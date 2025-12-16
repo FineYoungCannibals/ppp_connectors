@@ -1,5 +1,5 @@
-from apiary.dbms_connectors.splunk import SplunkConnector
-from apiary.helpers import combine_env_configs, setup_logger
+from pyapiary.dbms_connectors.splunk import SplunkConnector
+from pyapiary.helpers import combine_env_configs, setup_logger
 from typing import Dict, Any
 
 env_config: Dict[str, Any] = combine_env_configs()

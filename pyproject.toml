@@ -1,12 +1,12 @@
 [tool.poetry]
-name = "apiary"
-packages = [{ include = "apiary", from = "src" }]
+name = "pyapiary"
+packages = [{ include = "pyapiary", from = "src" }]
 version = "2.0.0"
 description = "A simple, lightweight set of connectors and functions to various APIs and DBMSs, controlled by a central broker."
 authors = ["Rob D'Aveta <rob.daveta@gmail.com>"]
 readme = "README.md"
-homepage = "https://github.com/robd518/apiary"
-repository = "https://github.com/robd518/apiary"
+homepage = "https://github.com/robd518/pyapiary"
+repository = "https://github.com/robd518/pyapiary"
 
 [tool.poetry.dependencies]
 python = "^3.10"

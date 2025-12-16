@@ -1,4 +1,4 @@
-from apiary.api_connectors.urlscan import URLScanConnector, AsyncURLScanConnector
+from pyapiary.api_connectors.urlscan import URLScanConnector, AsyncURLScanConnector
 
 urlscan = URLScanConnector(
     load_env_vars=True,
