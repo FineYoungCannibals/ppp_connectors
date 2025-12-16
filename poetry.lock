@@ -679,10 +679,9 @@ zstd = ["zstandard"]
 name = "pyodbc"
 version = "5.3.0"
 description = "DB API module for ODBC"
-optional = true
+optional = false
 python-versions = ">=3.9"
 groups = ["main"]
-markers = "extra == \"odbc\""
 files = [
     {file = "pyodbc-5.3.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:6682cdec78f1302d0c559422c8e00991668e039ed63dece8bf99ef62173376a5"},
     {file = "pyodbc-5.3.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:9cd3f0a9796b3e1170a9fa168c7e7ca81879142f30e20f46663b882db139b7d2"},
@@ -1373,9 +1372,9 @@ multidict = ">=4.0"
 propcache = ">=0.2.1"
 
 [extras]
-odbc = ["pyodbc"]
+odbc = []
 
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.10"
-content-hash = "0d4e179b4e600b3f627bfe0514b4147ee3f17b5aaaf2b7fb374fe4befe25abba"
+content-hash = "7c335bd1bffc7815b9c7e4c7c8869fb9dc389befdd7c3ab841eea8ffe799284d"
