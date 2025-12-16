@@ -1,0 +1,64 @@
+interactions:
+- request:
+    body: '{"url": "github.com", "key": "REDACTED"}'
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '61'
+      content-type:
+      - application/json
+      host:
+      - ipqualityscore.com
+      user-agent:
+      - python-httpx/0.28.1
+    method: POST
+    uri: https://ipqualityscore.com/api/json/url/
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA3RUTW/bMAz9KwIPOzmu7DhN4mGXDcO2yy7dDtsaGIyt2EJkyROptlnR/z6ocT76
+        dbL4HkXykbTuoVdE2Coo4SrUtSJKIQHaH6FkH1QCwRJuFJQbNKQSaFyP2kIJreYurNPa9ZCAd46r
+        1yk9VNg0/jEiZIVMF3maZUVaxFTK3yj//EbtLCvLFe+GWBqrO76+6Lg370XdoSfFHwJvJosYgJED
+        VbVrFJS5lAkM2KqK9L9oL2bLy+Wh5Mqj3UI5nSfQWKpu0OjmoHFAv9W2PYqkAfv+HOjR3KI/dWHo
+        NHVPbgQadK1doCOETTB8tLymbUW1i0Fk1Bgs+91YOfy8ggQM2jbE8kfw8/fYDGTVOr+DEj65fgis
+        PIl34ptl5a1iOMp7nOM9dKHHOINsIXYKPQlsHSTAulfE2A9QZtkyW84KOZMJaHJQQi7lfJLJiVz+
+        yIoyl+VMTmRRSgkPx/DsA3GcRvyqJs5cNdqrOhpjG6lzniuj7bY6kEf9nYvXqnG2p0ZGvazZRMFf
+        NH8NayE+Bm0agbYR1OlBkNtw7L5wVqAgbVujElE7Y3DtPLK+UWIwyBvneyH2QWDf8V3Fpjkb66by
+        qnb+BDU9+voI7mWwqjvrjGu1Iij/rBLA0SOaT3d4lUB/d86i4WmKNPR3qUlb51qjxrVGw8WbTPYm
+        k7/BvARXCVg6r6WxlKeDXKSWnFXpuC6Wpq+BxQvQ0iTLF9MUb6mxNJnmqfPtiM/l/IDnWVq7NGz3
+        TJFnB2KWj7U+nuUBltkpafYs6SoBqtFa1VTBGyihYx7K64vriycvxEZbNGce9NLFq79BEVfxJ4df
+        2/Vlq3/fhgwe/gMAAP//AwB3HyEu9gQAAA==
+    headers:
+      CF-RAY:
+      - 95d29762d81310be-ORD
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 10 Jul 2025 19:50:40 GMT
+      NEL:
+      - '{"success_fraction":0,"report_to":"cf-nel","max_age":604800}'
+      Report-To:
+      - '{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v4?s=cnp43vf6ymYDAXC9fg%2FhY3TA2duBQq5GEDBoldh1PtroZ77jm2tQbOO7z5x%2Ffig70pMLaIIJmjnULNTy5Ts1IGQe4CgYtA244Lz7XwHYtCbbyHWOXBYB72ebfp50XXiPyMMb9g%3D%3D"}],"group":"cf-nel","max_age":604800}'
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      alt-svc:
+      - h3=":443"; ma=86400
+      cf-cache-status:
+      - DYNAMIC
+      server-timing:
+      - cfL4;desc="?proto=TCP&rtt=35415&min_rtt=33540&rtt_var=13917&sent=5&recv=9&lost=0&retrans=0&sent_bytes=3948&recv_bytes=1937&delivery_rate=129516&cwnd=38&unsent_bytes=0&cid=ff31fc6046b459f4&ts=565&x=0"
+    status:
+      code: 200
+      message: OK
+version: 1

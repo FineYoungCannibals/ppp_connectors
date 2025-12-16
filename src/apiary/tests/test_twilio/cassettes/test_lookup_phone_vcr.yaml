@@ -1,0 +1,68 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Authorization:
+      - DUMMY
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      host:
+      - lookups.twilio.com
+      user-agent:
+      - python-httpx/0.28.1
+    method: GET
+    uri: https://lookups.twilio.com/v2/PhoneNumbers/+14155552671?Fields=
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAAG2Q3UrEMBCFX6X0SlE3dLEK+xCLIF6JhJjOtmHz58xkSxHf3aQorcXcDDln+M5h
+        PmutrJWngKPCzvi+PlQ+WXtbzQag9MrBXzFvSR2SZ5zy7IpbN3UxN+LLc1FNB54NT9Ip1sOCyhyQ
+        xIoTbUSeIkjjGXJWD16v8r1iE7yaG2deSbm6b9rrqm3bu/3D49wjDiFTfHLvgGXjpskr+f3ny4+k
+        bGlHOuAqKCLIk7F2URAUkek9dAv6xyLjJI0qrhRHMiYXy63Q0HlxEhZmPTBHOghhQzinSDsejTVh
+        p4MTl714Kg2PcwqJbf1LLtxlBmOC3+98FgmIAcs1X6u3r29cgXV62wEAAA==
+    headers:
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Length:
+      - '271'
+      Content-Type:
+      - application/json;charset=utf-8
+      Date:
+      - Fri, 11 Jul 2025 17:18:13 GMT
+      Strict-Transport-Security:
+      - max-age=31536000
+      Twilio-Concurrent-Requests:
+      - '1'
+      Twilio-Request-Duration:
+      - '0.072'
+      Twilio-Request-Id:
+      - RQc8a2e45336e41fa56ef57dc5d1b07623
+      Vary:
+      - Accept-Encoding
+      - Origin
+      Via:
+      - 1.1 b8ac2f92eb514fa1ca7a47e834b5044e.cloudfront.net (CloudFront)
+      X-API-Domain:
+      - lookups.twilio.com
+      X-Amz-Cf-Id:
+      - -8mzkQVCupui1I0KUXPtHbjmOB3ubY0xB7iaWxCQpMjBxGQ-jAOikw==
+      X-Amz-Cf-Pop:
+      - ATL59-P9
+      X-Cache:
+      - Miss from cloudfront
+      X-Home-Region:
+      - us1
+      X-Powered-By:
+      - AT-5000
+      X-Shenanigans:
+      - none
+    status:
+      code: 200
+      message: OK
+version: 1
