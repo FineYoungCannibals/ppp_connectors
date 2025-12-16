@@ -1,5 +1,5 @@
-from ppp_connectors.dbms_connectors.elasticsearch import ElasticsearchConnector
-from ppp_connectors.helpers import combine_env_configs, setup_logger
+from apiary.dbms_connectors.elasticsearch import ElasticsearchConnector
+from apiary.helpers import combine_env_configs, setup_logger
 from typing import Dict, Any
 import json
 

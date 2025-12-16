@@ -1,5 +1,5 @@
-from ppp_connectors.dbms_connectors.odbc import ODBCConnector
-from ppp_connectors.helpers import combine_env_configs, setup_logger
+from apiary.dbms_connectors.odbc import ODBCConnector
+from apiary.helpers import combine_env_configs, setup_logger
 from typing import Dict, Any
 
 env_config: Dict[str, Any] = combine_env_configs()
