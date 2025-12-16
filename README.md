@@ -1,8 +1,13 @@
 # ppp_connectors
 
-
 A clean, modular set of Python connectors and utilities for working with both **APIs** and **DBMS backends**, unified by a centralized `Broker` abstraction and a consistent interface. Designed for easy testing, code reuse, and plug-and-play extensibility.
 
+## ⚠️ **Deprecation notice**
+
+**APIary** is the successor to the `ppp-connectors` package.
+The original `ppp-connectors` package has been frozen at its final 0.x.x release
+and will continue to remain available on PyPI for existing users.
+New development and releases are published under the `apiary` package name.
 
 ## 📚 Table of Contents
 

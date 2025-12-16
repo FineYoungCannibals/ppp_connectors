@@ -1,4 +1,16 @@
 # API connectors
+import warnings
+
+warnings.warn(
+    (
+        "The 'ppp_connectors' package is deprecated and no longer maintained. "
+        "Please migrate to the 'apiary' package. "
+        "See https://github.com/robd518/apiary for details."
+    ),
+    DeprecationWarning,
+    stacklevel=2,
+)
+
 from ppp_connectors.api_connectors import (
     urlscan,
     spycloud,
