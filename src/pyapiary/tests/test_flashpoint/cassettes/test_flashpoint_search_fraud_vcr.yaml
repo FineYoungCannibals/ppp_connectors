@@ -1,0 +1,66 @@
+interactions:
+- request:
+    body: '{"query": "dark web"}'
+    headers:
+      Authorization:
+      - DUMMY
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '20'
+      content-type:
+      - application/json
+      host:
+      - api.flashpoint.io
+      user-agent:
+      - python-httpx/0.28.1
+    method: POST
+    uri: https://api.flashpoint.io/sources/v2/fraud
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA6tWyixJzS1WsoqO1VEqzqxKVbIy0FEqyS9JzFGyqlYqS8wphQgVpeYklmTm5ylZ
+        Kdkq1dYCAEK/yh84AAAA
+    headers:
+      CF-RAY:
+      - 95d9b8290dfc137a-MEM
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 11 Jul 2025 16:36:22 GMT
+      Server:
+      - cloudflare
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains
+      Transfer-Encoding:
+      - chunked
+      cf-cache-status:
+      - DYNAMIC
+      ratelimit-limit:
+      - '5'
+      ratelimit-remaining:
+      - '4'
+      ratelimit-reset:
+      - '1'
+      via:
+      - kong/2.8.3
+      x-kong-proxy-latency:
+      - '6'
+      x-kong-upstream-latency:
+      - '84'
+      x-ratelimit-limit-second:
+      - '5'
+      x-ratelimit-remaining-second:
+      - '4'
+    status:
+      code: 200
+      message: OK
+version: 1
