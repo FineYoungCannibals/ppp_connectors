@@ -679,7 +679,7 @@ zstd = ["zstandard"]
 name = "pyodbc"
 version = "5.3.0"
 description = "DB API module for ODBC"
-optional = true
+optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 markers = "extra == \"odbc\""
@@ -1378,4 +1378,4 @@ odbc = ["pyodbc"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.10"
-content-hash = "0d4e179b4e600b3f627bfe0514b4147ee3f17b5aaaf2b7fb374fe4befe25abba"
+content-hash = "7c335bd1bffc7815b9c7e4c7c8869fb9dc389befdd7c3ab841eea8ffe799284d"
